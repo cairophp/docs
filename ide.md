@@ -10,7 +10,7 @@ repository and require it as a dev dependency:
 ```json
 {
     "repositories": [{"type": "vcs", "url": "https://github.com/cairophp/stubs"}],
-    "require-dev": {"cairophp/stubs": "^0.1"}
+    "require-dev": {"cairophp/stubs": "^0.2"}
 }
 ```
 
