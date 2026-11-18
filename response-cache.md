@@ -24,3 +24,35 @@ $http->get('/products', $listProducts)
 
 Go middleware still runs on a cached request; values it passes to PHP (such
 as the request id) are those of the request that built the response.
+
+A HEAD request to a cached route is answered from what a GET stored; on a
+miss PHP runs, and its answer is not stored.
+
+## Purging by tag
+
+A TTL bounds how old a response can be. To drop responses the moment their
+data changes, give the route tags and purge them:
+
+```php
+use Cairo\Cache;
+
+$http->get('/products', $listProducts)->cache(ttl: 60, tags: ['products']);
+$http->get('/products/{id}', $showProduct)->cache(ttl: 60, tags: ['products']);
+
+$http->post('/products', function (Request $r) use ($db): Response {
+    $db->exec('INSERT INTO products ...');
+    Cache::purge('products');
+    return Response::json(['ok' => true], 201);
+});
+```
+
+- `Cache::purge('a', 'b')` drops every cached response of the routes tagged
+  `a` or `b`, on all HTTP servers of the process. The next request runs PHP.
+- A response PHP was already building when the purge came is not stored, and
+  requests that arrive after the purge do not wait for it.
+- A purge costs the same however much is cached, so calling it on every
+  write is fine. A tag no route declares is ignored.
+- Tags belong to routes, not to single responses: purging `products` drops
+  every page and query string of the tagged routes.
+
+`examples/cache` has a runnable server with each of these.
