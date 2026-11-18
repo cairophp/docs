@@ -16,3 +16,43 @@ corrupting the protocol. A connection is dropped instead of given back when
 the request was cancelled or past its deadline while holding it (a wait it was
 in may have cut a reply short), and, with `with()`, when the callback throws.
 After a connection error with `get()`, call `discard()`.
+
+## Waiting for a connection
+
+```php
+$db = new Cairo\Pool($factory, max: 10, acquireTimeout: 2.0);
+```
+
+- Without `acquireTimeout`, a request waits until a connection comes back.
+  A request past its deadline (`Middleware::timeout()`) is skipped then, and
+  its `get()` throws a `Cairo\Context\ContextException`.
+- With `acquireTimeout`, `get()` throws a `Cairo\PoolTimeout` after that many
+  seconds, and a request whose client went away stops waiting at once. This
+  wait goes through Go, which costs a little on a pool that is always full.
+
+Turn a `PoolTimeout` into a 503: it means the pool is too small for the
+load, or a query is slow. `stats()` returns `open`, `idle`, `waiting` and
+`max`.
+
+## What the next request gets
+
+A connection is reset before another fiber uses it:
+
+- By default, a PDO transaction a request left open is rolled back.
+- `reset:` replaces that with your own check, for example
+  `reset: fn (PDO $pdo) => $pdo->exec('DISCARD ALL')` on PostgreSQL when
+  requests change session settings. It runs on every return, so keep it
+  cheap.
+- A connection whose reset throws is dropped, and the pool opens a new one.
+
+## Retiring connections
+
+```php
+$db = new Cairo\Pool($factory, max: 10, maxLifetime: 1800, maxIdleTime: 300);
+```
+
+`maxLifetime` and `maxIdleTime` are in seconds (0: no limit). Set them below
+the server's own idle timeout (`wait_timeout` on MySQL) and any firewall's,
+so a request never gets a connection the other side has already closed.
+
+`examples/pool` has a runnable server with each of these.
