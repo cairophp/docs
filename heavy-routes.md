@@ -31,5 +31,6 @@ level=WARN msg="heavy route: move its CPU work to offload()" route="POST /report
 
 It is off by default (0). It uses the same timing as the
 [slow request log](slow-requests.md): off, one nil check per wait; on, two
-clock reads per wait. `examples/heavy` has a heavy route, the same work
+clock reads per wait. Neither shows in the benchmarks: plain-text and
+PostgreSQL requests per second stayed within the run-to-run noise. `examples/heavy` has a heavy route, the same work
 split by waits, and the same work in `offload()`. Only the first is logged.
