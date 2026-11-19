@@ -9,7 +9,7 @@ $app->slowRequests(0.5);   // log requests that take longer than 0.5 s
 ```
 
 ```
-level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 sql="38 in 310ms" http="2 in 890ms"
+level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest_run_ms=12 sql="38 in 310ms" http="2 in 890ms"
 ```
 
 - `route` is the route's method and pattern (never the raw path), or the
@@ -18,6 +18,9 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 sql="38
   fibers was waiting in Go: PHP running, or the request queued behind other
   requests on its thread. If it is high and the CPU is idle, look for a
   blocking call with [the blocking detector](blocking.md).
+- `longest_run_ms` is the longest stretch of PHP the request ran without
+  yielding to Go. Every other request on its thread waited for that long. A
+  high value means CPU work that belongs in `offload()`, or a blocking call.
 - Each kind of wait that happened is listed with its count and total time:
   - `sql`: PDO pgsql and `Cairo\Sql`.
   - `http`: `Cairo\Http\Client` and curl.
