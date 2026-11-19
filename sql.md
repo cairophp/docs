@@ -48,3 +48,35 @@ query is one round trip instead of three (prepare, execute, close); set
 `examples/sql/mysql.php`
 is the same example as `server.php` for MySQL. PDO MySQL keeps working too,
 through the hooked streams.
+
+## A shared pool, safely
+
+Each statement on `$db` takes whichever connection is free and gives it back
+when it ends, so nothing it leaves on that connection may reach the next
+request:
+
+- `BEGIN`, `START TRANSACTION`, `SET autocommit`, `LOCK` and `XA` on `$db`
+  throw a `SqlException`. Use `$db->transaction()`, which keeps one
+  connection until it commits or rolls back.
+- A PostgreSQL connection that comes back in a transaction anyway (a
+  multi-statement string such as `SELECT 1; BEGIN`) is closed, which rolls it
+  back, instead of being reused. MySQL URLs refuse `multiStatements`.
+- Other session state (`SET search_path`, temporary tables, `GET_LOCK()`,
+  advisory locks) does reach the next request, as with any pool: set it inside
+  a transaction (`SET LOCAL`), or avoid it.
+
+### Waiting for a connection
+
+```php
+$db = Db::open($dsn, ['max_open' => 20, 'acquire_timeout' => 2.0]);
+```
+
+When all `max_open` connections are in use, a query waits for one on its
+fiber. Without `acquire_timeout` it waits until the request ends (its
+deadline, or the client going away). With it, the query throws a
+`Cairo\PoolTimeout` after that many seconds: turn it into a 503. `stats()`
+returns `wait_count` and `wait_time` to size the pool. `max_lifetime` and
+`max_idle_time` (seconds) retire old connections; set them below the
+server's own idle timeout (`wait_timeout` on MySQL).
+
+`examples/sql/hardening.php` shows each of these on PostgreSQL and MySQL.
