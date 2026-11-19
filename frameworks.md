@@ -22,3 +22,20 @@ conversions by hand: `psr15()`, `symfony()`, `toPsr7()`, `fromPsr7()`,
 Most framework apps keep request state in services and globals, so run them
 with `->concurrency('isolated')` until they are known to be fiber-safe. See
 `examples/frameworks`.
+
+## The document root
+
+`$http->publicDir($dir)` serves the files under `$dir` at their own paths, the
+way nginx or Caddy serves a document root, and sends every other request to
+the routes and `fallback()`:
+
+```php
+$http->publicDir(__DIR__ . '/public');   // /build/app.css, /favicon.ico, /robots.txt
+$http->fallback($kernel);                // everything else
+```
+
+Go serves the files; no PHP runs for them. Only GET and HEAD requests for
+regular files are served. PHP files (`index.php`) and hidden files and
+directories (`.env`, `.git/`) are never served as files: those paths go to the
+app. Paths cannot leave `$dir`, and symlinks that point outside it are not
+followed.
