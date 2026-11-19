@@ -31,6 +31,7 @@ repository.
 - [Finding blocking code](blocking.md)
 - [Slow request log](slow-requests.md)
 - [Repeated queries (N+1)](repeated-queries.md)
+- [Heavy routes](heavy-routes.md)
 
 ## Data and I/O
 
