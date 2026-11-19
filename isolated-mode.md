@@ -20,8 +20,10 @@ echoed, its `header()` calls and `http_response_code()`. After each request it
 clears the superglobals and calls `reset()` on everything given to
 `resetAfterRequest()` (any object with a `reset()` method, such as
 `Cairo\Resettable` or Symfony's `ResetInterface`, or a callable). Requests that
-arrive while a thread is busy wait in line for it, so use more threads in
-this mode.
+arrive while every thread is busy wait in Go, in one first-in, first-out
+queue, and go to the next thread that is free, so a slow request never holds
+up the ones behind it while another thread is idle. Use more threads in this
+mode.
 
 Uploads are parsed by Go into temporary files that are removed after the
 request. `move_uploaded_file()` and `is_uploaded_file()` accept them in both
