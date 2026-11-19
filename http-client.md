@@ -29,3 +29,28 @@ Options, on the constructor or per request: `base_uri`, `headers`, `query`,
 (a PEM path, or `[cert, key]`). Every status comes back as a response;
 `Cairo\Http\ClientException` (with `->kind`: `connect`, `tls`, `timeout`,
 `redirects`, `request`) means there was none. Bodies are read in full.
+
+The connection pool lives in Go and is shared by every PHP thread, one per
+set of TLS options, so all threads reuse the same keep-alive and HTTP/2
+connections to a host.
+
+## One upstream call for identical requests
+
+```php
+$rates = new Client(['base_uri' => 'https://rates.example.com', 'coalesce' => true]);
+```
+
+With `coalesce`, identical `GET` and `HEAD` requests in flight at the same
+moment, from any fiber on any thread, share one upstream call and all get
+its response. Under load a hot URL is fetched once per round trip instead of
+once per request: in the benchmark, 256 concurrent requests to a 20 ms
+upstream made 354 upstream calls instead of 88,000.
+
+Identical means the same method, URL, headers (so the same `Authorization`
+and `Cookie`), TLS options, redirects and timeout. Requests with a body never
+share. Turn it on only for hosts whose answer depends on nothing else, such
+as public or per-token data, and never for calls with side effects. A caller
+that is cancelled or passes its deadline stops waiting without failing the
+others, and the upstream call is cancelled when no caller is left. Results
+are shared only while the call is in flight. To keep answers longer, cache
+them (see [Response cache](response-cache.md)).
