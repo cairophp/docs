@@ -24,7 +24,7 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 sql="38
   - `socket`: other hooked sockets, such as PDO MySQL, Redis and streams.
   - `connect`: DNS, connect and TLS handshakes.
   - `sleep`.
-  - `wait`: channels, `select()` and pools.
+  - `wait`: channels, `select()`, and `Cairo\Pool` with `acquireTimeout`.
   - `offload`.
   - `grpc`: the gRPC client.
 - Waits of `async()` tasks run side by side, so the kinds can add up to
@@ -32,8 +32,9 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 sql="38
 - A request that ends at its deadline, or because the client went away, is
   logged with `ended=deadline_exceeded` or `ended=canceled`.
 
-Socket waits shorter than about 1 ms are done on the PHP thread, not in Go,
-so they count as `php_ms`. Nothing from the request, such as parameters,
+Two waits happen in PHP rather than in Go, so they count as `php_ms`: socket
+waits shorter than about 1 ms, and a `Cairo\Pool` wait without
+`acquireTimeout`. Nothing from the request, such as parameters,
 headers or query text, is logged.
 
 The log costs nothing measurable. It is off by default (0), and when on it
