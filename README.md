@@ -29,6 +29,7 @@ repository.
 - [Request state: Context values](context-values.md)
 - [Runtime hooks](runtime-hooks.md)
 - [Finding blocking code](blocking.md)
+- [Slow request log](slow-requests.md)
 - [Repeated queries (N+1)](repeated-queries.md)
 
 ## Data and I/O
