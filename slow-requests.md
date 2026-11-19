@@ -40,6 +40,8 @@ waits shorter than about 1 ms, and a `Cairo\Pool` wait without
 `acquireTimeout`. Nothing from the request, such as parameters,
 headers or query text, is logged.
 
-The log costs nothing measurable. It is off by default (0), and when on it
-adds two clock reads per wait. `examples/slow` has a request with an HTTP
+It is off by default (0). Off, it costs one nil check per wait; on, two
+clock reads per wait. Neither shows in the benchmarks: plain-text and
+PostgreSQL requests per second stayed within 2% of the build without it,
+less than the run-to-run noise. `examples/slow` has a request with an HTTP
 call, waits in `async()` tasks and CPU work.
