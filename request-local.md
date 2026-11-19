@@ -46,6 +46,44 @@ With three statics registered, a fiber switch between requests took about
 15 ns more (60 ns → 75 ns). Plain-text and PostgreSQL requests per second
 were unchanged with nothing registered.
 
-This is the first step to running Laravel without isolated mode: a bridge
-will register `Facade::$app` and `Container::$instance` and give each request
-its own app.
+## Finding statics that hold request state
+
+A package that hides request state in a static you did not register leaks
+it silently: nothing crashes, and one user sees another's data. In
+development, turn on the detector:
+
+```php
+$app->detectLeaks();
+```
+
+When a request ends, Cairo reads every static property of the app's classes,
+a few levels into arrays and objects, and compares it with its value when the
+previous request ended. It logs the ones that look like request state:
+
+```
+level=WARN msg="static changed by a request" route="GET /orders" static=App\Tenant::$current
+```
+
+- A value that was set and is then replaced again, such as the current
+  tenant, is reported. So is a list that keeps growing.
+- A value set once and kept (a lazy singleton or a setting), a cache that
+  only gains keys, and a static that is cleared are not reported.
+- Registered statics and Cairo's own are skipped. Skip others with
+  `detectLeaks(ignore: ['Vendor\Thing::$cache'])`.
+- Each static is logged at most once a minute.
+
+It works in both modes: in isolated mode a static also carries over from one
+request to the next. It reads every static on every request (about 3 ms on a
+Laravel app), so keep it off in production. It only sees code that ran, so
+exercise the app (its test suite, or a load test) with it on.
+`examples/leaks` has a static that leaks, a growing list, a cache and a
+registered static.
+
+## Laravel
+
+[cairophp/octane](https://github.com/cairophp/octane) runs Laravel Octane in
+fiber mode: each request in flight gets its own booted app, and the statics
+an app sets (the facade root, Eloquent's booted models, the closures service
+providers set while the app boots) are registered and kept per app. Run it
+with `php artisan octane:cairo --mode=fibers --detect-leaks` to check your
+app's packages.
