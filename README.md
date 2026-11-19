@@ -27,6 +27,7 @@ repository.
 - [Context and deadlines](context.md)
 - [Concurrency API](concurrency.md)
 - [Request state: Context values](context-values.md)
+- [Request-local statics](request-local.md)
 - [Runtime hooks](runtime-hooks.md)
 - [Finding blocking code](blocking.md)
 - [Slow request log](slow-requests.md)
