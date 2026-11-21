@@ -3,7 +3,7 @@
 A PHP thread runs many requests at once, one fiber each, but only one of
 them runs PHP at a time. While a request computes without waiting on I/O,
 every other request on its thread waits for it. Cairo can name the routes
-that do this, measured in Go with no code in the app:
+that do this, measured with no code in the app:
 
 ```php
 $app->heavyRoutes(0.05);   // warn about stretches of PHP longer than 50 ms
@@ -16,7 +16,7 @@ level=WARN msg="heavy route: move its CPU work to offload()" route="POST /report
 - `route` is the route's method and pattern (never the raw path), or the
   full gRPC method.
 - `longest_run_ms` is the longest stretch of PHP that one request ran
-  without yielding to Go. Every wait through Cairo yields: queries, HTTP
+  without pausing. Every wait through Cairo pauses it: queries, HTTP
   calls, sockets, `sleep()`, channels and `offload()`.
 - Each route is logged at most once a minute, however often it runs.
 - The fix is usually to move the work into `Cairo\offload()`. It runs on an

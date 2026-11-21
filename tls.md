@@ -9,8 +9,8 @@ ext/openssl and suspend only the fiber. The `ssl` context options
 `allow_self_signed`, `cafile`, `capath`, and client certificates through
 `local_cert`, `local_pk` and `passphrase` are honoured.
 `stream_socket_enable_crypto()` upgrades an open `tcp://` connection
-(STARTTLS, as SMTP and IMAP clients do): Go handshakes on the fiber's
-goroutine and the stream carries on over TLS. Only the client side is
+(STARTTLS, as SMTP and IMAP clients do): Go handshakes on a goroutine
+and the stream carries on over TLS. Only the client side is
 offered. `stream_socket_enable_crypto($s, false)` turns TLS off again, as FTP
 clients do after `CCC`: Go sends what PHP wrote, then a close_notify, waits
 for the peer's (up to the stream's timeout), and the stream carries on in

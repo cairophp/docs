@@ -2,8 +2,9 @@
 
 User documentation for [Cairo](https://github.com/cairophp/cairo), a PHP
 application server written in Go: you declare HTTP and gRPC servers in PHP,
-and Go does the serving. Every request runs in its own PHP Fiber with its own
-goroutine, so one PHP thread can hold thousands of requests at once.
+and Go does the serving. Every request runs in its own PHP Fiber, and a
+fiber that waits leaves its thread to the others, so one PHP thread can hold
+thousands of requests at once.
 
 These pages describe the `main` branch of Cairo;
 [CHANGELOG.md](https://github.com/cairophp/cairo/blob/main/CHANGELOG.md) says

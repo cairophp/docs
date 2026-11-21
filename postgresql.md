@@ -2,7 +2,7 @@
 
 Cairo has its own PDO driver for `pgsql:` DSNs, written in C on the PDO side
 and backed by Go's pgx (`pgconn`) on the other, so it needs no libpq. Inside a
-request fiber each query runs on the fiber's goroutine (`Hook::PGSQL`): the
+request fiber each query runs in Go, on a goroutine (`Hook::PGSQL`): the
 fiber suspends, and the request's deadline cancels the query. With one PHP
 thread, 50 requests running `pg_sleep(1)` finish in about 1 second (50
 seconds with the hook off).
