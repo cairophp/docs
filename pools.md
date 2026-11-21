@@ -27,8 +27,9 @@ $db = new Cairo\Pool($factory, max: 10, acquireTimeout: 2.0);
   A request past its deadline (`Middleware::timeout()`) is skipped then, and
   its `get()` throws a `Cairo\Context\ContextException`.
 - With `acquireTimeout`, `get()` throws a `Cairo\PoolTimeout` after that many
-  seconds, and a request whose client went away stops waiting at once. This
-  wait goes through Go, which costs a little on a pool that is always full.
+  seconds, and a request whose client went away stops waiting at once. The
+  PHP thread keeps a timer for this wait, which costs a little on a pool that
+  is always full.
 
 Turn a `PoolTimeout` into a 503: it means the pool is too small for the
 load, or a query is slow. `stats()` returns `open`, `idle`, `waiting` and

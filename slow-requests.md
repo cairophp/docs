@@ -1,7 +1,7 @@
 # Slow request log
 
-Every wait of a request goes through Go: queries, HTTP calls, sockets,
-sleeps, channel waits and offload jobs. So Go can log where a slow request
+Every wait of a request goes through Cairo: queries, HTTP calls, sockets,
+sleeps, channel waits and offload jobs. So Cairo can log where a slow request
 spent its time, with no code in the app:
 
 ```php
@@ -15,11 +15,11 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest
 - `route` is the route's method and pattern (never the raw path), or the
   full gRPC method.
 - `ms` is the whole request. `php_ms` is the time when none of the request's
-  fibers was waiting in Go: PHP running, or the request queued behind other
+  fibers was waiting: PHP running, or the request queued behind other
   requests on its thread. If it is high and the CPU is idle, look for a
   blocking call with [the blocking detector](blocking.md).
 - `longest_run_ms` is the longest stretch of PHP the request ran without
-  yielding to Go. Every other request on its thread waited for that long. A
+  pausing. Every other request on its thread waited for that long. A
   high value means CPU work that belongs in `offload()`, or a blocking call.
 - Each kind of wait that happened is listed with its count and total time:
   - `sql`: PDO pgsql and `Cairo\Sql`.
@@ -35,8 +35,8 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest
 - A request that ends at its deadline, or because the client went away, is
   logged with `ended=deadline_exceeded` or `ended=canceled`.
 
-Two waits happen in PHP rather than in Go, so they count as `php_ms`: socket
-waits shorter than about 1 ms, and a `Cairo\Pool` wait without
+Two waits are not counted, so they show as `php_ms`: in isolated mode, a
+socket wait shorter than about 1 ms, and a `Cairo\Pool` wait without
 `acquireTimeout`. Nothing from the request, such as parameters,
 headers or query text, is logged.
 

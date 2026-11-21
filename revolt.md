@@ -10,12 +10,13 @@ Cairo\Revolt\Driver::install();   // once, in server.php
 ```
 
 `Amp\delay()`, `Amp\async()`, futures, cancellations and Amp's sockets and
-HTTP client then wait in Go like any other Cairo call, so one PHP thread
+HTTP client then wait like any other Cairo call, so one PHP thread
 serves many such requests at once. In the example, 20 `amphp/http-client`
 requests to a 1s endpoint take about 1s on one thread. Each Revolt callback
 runs in an `async()` task: `defer()` and `queue()` as soon as the current
-fiber yields, timers on Go timers, and `onReadable()`/`onWritable()` when Go's
-poller sees the socket ready. A `Suspension` parks its fiber in Go.
+fiber yields, timers on the thread's timers, and `onReadable()`/`onWritable()`
+when the thread's epoll sees the socket ready. A `Suspension` parks its fiber
+on the thread.
 
 Some things differ from Revolt's own drivers:
 

@@ -67,7 +67,7 @@ Health checking (`grpc.health.v1`) and server reflection are built in, so
 
 Calling gRPC services: the generated client carries its `.proto` descriptors,
 and `Cairo\Grpc\Client` takes arrays with `.proto` files. Calls run through
-grpc-go on the fiber's goroutine (only the fiber waits, and the request's
+grpc-go on a goroutine in Go (only the fiber waits, and the request's
 deadline caps the call); connections are shared across requests and threads.
 
 ```php

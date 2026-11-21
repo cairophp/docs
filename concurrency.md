@@ -4,7 +4,7 @@
 use function Cairo\{async, await, all, sleep, offload};
 
 [$a, $b] = await(all([
-    async(fn () => fetchUser($id)),     // each async() fiber gets its own goroutine
+    async(fn () => fetchUser($id)),     // each async() is a fiber of its own on this thread
     async(fn () => fetchOrders($id)),
 ]));
 ```
@@ -34,7 +34,10 @@ foreach ($jobs as $id) { /* until closed and drained */ }
 ], timeout: 0.5);                   // [null, null, false] after 0.5s; 0 never waits
 ```
 
-A waiting fiber is suspended, not the thread. The wait also ends when the
+A waiting fiber is suspended, not the thread, and the thread keeps the wait
+itself: a `sleep()` or a hand-over between two fibers costs about a
+microsecond, and fibers that sleep until the same moment wake in the order
+they went to sleep. The wait also ends when the
 request's context ends: with `$ctx->done()` among the cases, select() returns
 that case; otherwise it throws `Context\DeadlineExceeded` or
 `Context\Canceled`. After `close()`, receivers get what is buffered, then
