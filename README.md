@@ -36,6 +36,7 @@ repository.
 
 ## Data and I/O
 
+- [MySQL and MariaDB, and a recommended setting](mysql.md)
 - [PostgreSQL](postgresql.md)
 - [Connection pools](pools.md)
 - [Cairo\Net](net.md)
