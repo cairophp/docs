@@ -31,11 +31,12 @@ Measured on a request with a browser's headers, two MySQL queries and a
 1.5 KB JSON answer (2 CPUs, 4 PHP threads, 64 connections; about 100 µs of
 CPU per request):
 
-| Middleware | Requests per second |
-|---|---|
-| `accessLog()` | about 6% fewer: one log line is formatted and written per request |
-| `timeout()` | about 3% fewer, which is near the least the measurement can show: each request gets a deadline and a timer |
-| `requestId()` | no difference that the measurement could show |
+| Middleware | CPU per request | Requests per second |
+|---|---|---|
+| `accessLog()` | about 6 µs: one log line is formatted and written | about 6% fewer |
+| `timeout()` | about 2.6 µs: a deadline and a timer | too little for the measurement to show |
+| `requestId()` | about 1.8 µs: an id, and a header on both sides | too little for the measurement to show |
+| All three | about 10.6 µs | about 13% fewer |
 
 On a request that costs more, such as a framework's, the same work is a
 smaller share. An access log written by the reverse proxy in front of Cairo
