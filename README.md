@@ -32,22 +32,18 @@ repository.
 - [Runtime hooks](runtime-hooks.md)
 - [Finding blocking code](blocking.md)
 - [Slow request log](slow-requests.md)
-- [Repeated queries (N+1)](repeated-queries.md)
 - [Heavy routes](heavy-routes.md)
 
 ## Data and I/O
 
 - [PostgreSQL](postgresql.md)
-- [Cairo\Sql](sql.md)
 - [Connection pools](pools.md)
-- [HTTP client](http-client.md)
 - [Cairo\Net](net.md)
 
 ## Running applications
 
 - [Isolated mode](isolated-mode.md)
 - [Frameworks: PSR-15, Symfony and Laravel](frameworks.md)
-- [Amp and Revolt](revolt.md)
 - [Thread supervision](supervision.md)
 
 ## Tooling

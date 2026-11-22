@@ -22,8 +22,8 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest
   pausing. Every other request on its thread waited for that long. A
   high value means CPU work that belongs in `offload()`, or a blocking call.
 - Each kind of wait that happened is listed with its count and total time:
-  - `sql`: PDO pgsql and `Cairo\Sql`.
-  - `http`: `Cairo\Http\Client` and curl.
+  - `sql`: PDO pgsql.
+  - `http`: curl.
   - `socket`: other hooked sockets, such as PDO MySQL, Redis and streams.
   - `connect`: DNS, connect and TLS handshakes.
   - `sleep`.
