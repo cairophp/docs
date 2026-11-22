@@ -32,7 +32,8 @@ directory. Without one, errors are logged and not displayed. PHP's log lines
 unless `error_log` names a file. `max_execution_time` and `max_input_time`
 stay off whatever the ini says, because each PHP thread runs one long request;
 request deadlines come from `Middleware::timeout()` and gRPC deadlines. `dl()`
-is not available.
+is not available. One setting is worth adding for apps that use MySQL:
+[`mysqlnd.collect_statistics = 0`](mysql.md#recommended-turn-off-mysqlnds-statistics).
 
 Requirements: Go 1.24+, a C toolchain, the -dev packages listed in `scripts/build-php.sh`, and PHP 8.1 or newer (fibers).
 
