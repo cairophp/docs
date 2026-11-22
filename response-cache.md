@@ -28,6 +28,11 @@ as the request id) are those of the request that built the response.
 A HEAD request to a cached route is answered from what a GET stored; on a
 miss PHP runs, and its answer is not stored.
 
+A request that the cache answers is not read for PHP: Cairo looks in the
+cache first and only then reads the request's body, so a GET that carries a
+body gets the cached response whatever that body is. A request with a
+`multipart/form-data` body never uses the cache.
+
 ## Purging by tag
 
 A TTL bounds how old a response can be. To drop responses the moment their
