@@ -72,6 +72,12 @@ a fiber switch; once 64 replies are waiting, it waits for room. Queued replies r
 the client before the call's status, and a write that failed (the client went
 away) is thrown by the next `send()`.
 
+Go reads the client's messages ahead of the handler, from its first `recv()`:
+64 messages or 1 MiB at most, after which the client meets HTTP/2's flow
+control as it does with any reader that is slow. `recv()` waits only when
+none has arrived, so a handler that reads many messages does not pay a wait
+for each.
+
 Health checking (`grpc.health.v1`) and server reflection are built in, so
 `grpcurl -plaintext localhost:9000 list` works.
 
@@ -108,3 +114,16 @@ $chat->closeSend();
 `Cairo\Grpc\Client` has the same through `stream()` and `serverStream()`.
 A stream keeps the request's deadline, and `close()` (or dropping the
 object) cancels it.
+
+A client's stream works like a handler's. `send()` queues the request for Go
+to write and returns; once 64 are waiting, it waits for room. A request that
+is no message of the method's type is refused by its own `send()`; one that
+could not be written is thrown by the next `send()` or by `closeSend()`,
+which returns once all that was sent is written. The status of the call
+comes from `recv()`, after the replies that arrived before it. Replies are
+read ahead in Go, 64 or 1 MiB at most, and `recv()` waits only when none has
+arrived.
+
+Messages cross between the client and PHP as they do in the server: straight
+between protobuf's bytes and PHP's array, with protojson for the same
+exceptions.
