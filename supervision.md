@@ -14,8 +14,12 @@ $app->maxRequests(10_000)   // after this many requests
     ->maxMemory('256M');    // or once memory_get_usage() reaches this, checked after each request
 ```
 
-Cairo starts the replacement first and sends new requests to it, then lets the
-old thread finish the requests it holds before it exits, so no request fails.
+Cairo starts the replacement first. The old thread keeps serving until the new
+one has run `server.php`, which is where a framework boots, so no request
+waits for that boot. Then new requests go to the new thread, and the old one
+finishes the requests it holds before it exits. No request fails. For the
+length of the boot the old thread serves past `maxRequests()`, and both
+threads hold their memory.
 
 `$app->maxInFlight(100)` caps the requests each request thread holds at once.
 Requests over the cap wait in Go until one finishes, or until their own
