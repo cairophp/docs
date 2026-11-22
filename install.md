@@ -35,8 +35,8 @@ the stubs package ([IDE and static analysis](ide.md)).
   Docker there.
 - PHP 8.1 or newer when you build Cairo yourself; the release binary has
   PHP 8.5.
-- PostgreSQL (through pgx, for `pdo_pgsql` and `Cairo\Sql`) and MySQL or
-  MariaDB (PDO MySQL and mysqli through hooked streams, and `Cairo\Sql`).
+- PostgreSQL (`pdo_pgsql`, through pgx) and MySQL or MariaDB (PDO MySQL and
+  mysqli through hooked streams).
 
 ## Known limitations
 
