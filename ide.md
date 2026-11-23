@@ -10,7 +10,7 @@ repository and require it as a dev dependency:
 ```json
 {
     "repositories": [{"type": "vcs", "url": "https://github.com/cairophp/stubs"}],
-    "require-dev": {"cairophp/stubs": "^0.2"}
+    "require-dev": {"cairophp/stubs": "^0.5"}
 }
 ```
 
@@ -20,5 +20,5 @@ does that for you). For Psalm, list `vendor/cairophp/stubs/cairo.php` under
 `<stubs>`. The package has no autoload entry on purpose: never `require` the
 stubs, since Cairo already declares these classes.
 
-`make stubs` regenerates the file from `php/runtime.php`, and a test fails
+`make stubs` regenerates the file from the runtime's PHP files, and a test fails
 when it is stale.
