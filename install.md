@@ -7,14 +7,14 @@ libc, so it also runs in `FROM scratch` images. Download it from the
 it against `SHA256SUMS`:
 
 ```sh
-curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.2.0/cairo-linux-amd64
-curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.2.0/SHA256SUMS
+curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.5.0/cairo-linux-amd64
+curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.5.0/SHA256SUMS
 sha256sum --check --ignore-missing SHA256SUMS
 install -m 755 cairo-linux-amd64 /usr/local/bin/cairo
 cairo version
 ```
 
-While the repository is private, download with `gh release download v0.2.0`
+While the repository is private, download with `gh release download v0.5.0`
 instead. In a container:
 
 ```dockerfile
