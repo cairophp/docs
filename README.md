@@ -20,10 +20,11 @@ repository.
 
 ## Serving
 
+- [HTTPS and HTTP/2](https.md)
 - [gRPC](grpc.md)
 - [Middleware](middleware.md)
 - [Response cache](response-cache.md)
-- [TLS](tls.md)
+- [TLS for outgoing connections](tls.md)
 
 ## Concurrency
 
