@@ -46,8 +46,10 @@ throws `Channel\Closed`. `trySend()` and `tryRecv()` never wait. Values stay
 in PHP and are not copied, so a channel cannot cross PHP threads; use
 `offload()` for that.
 
-All of this is the scheduler of a request thread. Where none runs, in a
-command of [`cairo php`](cli.md) and inside an `offload()` job, `async()`
-runs its task to the end before it returns, `offload()` runs the job in place
-and `sleep()` blocks: the same code works, one step after the other. A
-`Channel` that would have to wait there throws a `LogicException`.
+All of this is the scheduler of a PHP thread, and a script that
+[`cairo php`](cli.md) runs has it too: the script is the thread's one
+request. Where none runs, inside an `offload()` job and in a script's
+shutdown functions, `async()` runs its task to the end before it returns,
+`offload()` runs the job in place and `sleep()` blocks: the same code works,
+one step after the other. A `Channel` that would have to wait there throws a
+`LogicException`.
