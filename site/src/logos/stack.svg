@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Cairo">
+  <title>Cairo</title>
+  <!-- Four courses of a pyramid, one per PHP thread; the third has slid east, a fiber changing places. -->
+  <defs>
+    <linearGradient id="st-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#EE7A35"/></linearGradient>
+  </defs>
+  <path d="M50 12 L61 30 L39 30 Z" fill="url(#st-g)"/>
+  <path d="M35 36 H65 L72.5 50 H27.5 Z" fill="url(#st-g)"/>
+  <path d="M36 56 H80 L88 70 H28 Z" fill="#61D8CB"/>
+  <path d="M19 76 H81 L89 90 H11 Z" fill="url(#st-g)"/></svg>

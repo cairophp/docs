@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Cairo">
+  <title>Cairo</title>
+  <!-- The sun setting behind a pyramid: Cairo's oldest skyline, in two shapes. -->
+  <defs>
+    <linearGradient id="sr-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#EE7A35"/></linearGradient>
+    <linearGradient id="sr-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FE3D6"/><stop offset="1" stop-color="#2BA3B8"/></linearGradient>
+  </defs>
+  <circle cx="62" cy="46" r="26" fill="url(#sr-s)"/>
+  <path d="M42 18 L84 86 H8 Z" fill="url(#sr-g)"/>
+  <path d="M42 18 L84 86 H50 Z" fill="#B8521F" opacity=".35"/></svg>

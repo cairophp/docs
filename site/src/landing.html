@@ -1,0 +1,163 @@
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="index.html">{{LOGO}}<span>Cairo</span></a>
+    <nav aria-label="Main">
+      <a href="docs.html">Docs</a>
+      <a href="#features">Features</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#laravel">Laravel</a>
+    </nav>
+    <a class="gh" href="https://github.com/cairophp/cairo" aria-label="Cairo on GitHub">{{ICON_GITHUB}}<span>GitHub</span></a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="stage">
+      <div class="scene" aria-hidden="true">{{SCENE}}</div>
+      <div class="wrap hero-copy">
+        <a class="pill" href="https://github.com/cairophp/cairo/blob/main/CHANGELOG.md"><b>v0.5.0</b> PHP 8.5 · HTTP and gRPC · Apache-2.0</a>
+        <h1>The PHP app server that <em>never waits</em>.</h1>
+        <p class="lede">Declare HTTP and gRPC servers in PHP. Go does the serving, and every request runs in its own fiber, so one PHP thread holds thousands of requests while they wait on databases and APIs.</p>
+        <div class="cta">
+          <a class="btn btn-glow" href="docs.html#install">Get started {{ICON_ARROW}}</a>
+          <a class="btn btn-ghost" href="docs.html#how-it-works">How it works</a>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="install" role="region" aria-label="Install">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" id="t-bin" aria-selected="true" aria-controls="p-bin">Linux binary</button>
+          <button type="button" role="tab" id="t-docker" aria-selected="false" aria-controls="p-docker">Docker</button>
+          <button type="button" role="tab" id="t-octane" aria-selected="false" aria-controls="p-octane">Laravel Octane</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-bin" aria-labelledby="t-bin">{{INSTALL_BIN}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-docker" aria-labelledby="t-docker" hidden>{{INSTALL_DOCKER}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-octane" aria-labelledby="t-octane" hidden>{{INSTALL_OCTANE}}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="wrap"><div class="stat-grid">
+      <div><b>6.1×</b><span>FrankenPHP's throughput when each request waits, on the same two CPUs</span></div>
+      <div><b>19k</b><span>PostgreSQL requests a second, ahead of Swoole's 15k</span></div>
+      <div><b>~1 µs</b><span>to hand the thread from one fiber to the next</span></div>
+      <div><b>0</b><span>shared libraries: one static file runs in <code>FROM scratch</code></span></div>
+    </div></div>
+  </section>
+
+  <section class="runs">
+    <div class="wrap">
+      <p>Runs your stack</p>
+      <ul>
+        <li>Laravel <small>via Octane</small></li><li>Symfony</li><li>PSR-15</li><li>gRPC</li><li>PostgreSQL</li><li>MySQL</li><li>MariaDB</li><li>curl</li><li>Predis</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="how">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>Go holds the network. <em>PHP holds the logic.</em></h2>
+      <div class="how-grid">
+        <div class="diagram">{{DIAGRAM}}</div>
+        <ol class="steps">
+          <li><b>Declare.</b> <code>cairo serve server.php</code> runs your file once. <code>http()</code>, <code>get()</code>, <code>grpc()</code> and <code>service()</code> describe the servers for Go.</li>
+          <li><b>Serve.</b> Go opens the listeners, builds the router and compiles your <code>.proto</code> files without <code>protoc</code>.</li>
+          <li><b>One request, one fiber.</b> When a handler waits on a socket, a sleep or a query, only its fiber pauses. The thread runs the others.</li>
+          <li><b>Offload.</b> <code>Cairo\offload()</code> sends CPU-heavy work to its own threads, so a long loop never stalls a request thread.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="code-show">
+    <div class="wrap">
+      <p class="eyebrow">Write PHP</p>
+      <h2>Plain PHP, <em>concurrent by default</em>.</h2>
+      <div class="editor">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" id="t-http" aria-selected="true" aria-controls="p-http">server.php</button>
+          <button type="button" role="tab" id="t-grpc" aria-selected="false" aria-controls="p-grpc">Greeter.php</button>
+          <button type="button" role="tab" id="t-async" aria-selected="false" aria-controls="p-async">async.php</button>
+          <button type="button" role="tab" id="t-chan" aria-selected="false" aria-controls="p-chan">channels.php</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-http" aria-labelledby="t-http">{{CODE_HTTP}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-grpc" aria-labelledby="t-grpc" hidden>{{CODE_GRPC}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-async" aria-labelledby="t-async" hidden>{{CODE_ASYNC}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-chan" aria-labelledby="t-chan" hidden>{{CODE_CHAN}}</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <div class="wrap">
+      <p class="eyebrow">Features</p>
+      <h2>Cairo <em>at a glance</em></h2>
+      <div class="cards">{{CARDS}}</div>
+    </div>
+  </section>
+
+  <section id="benchmarks" class="bench">
+    <div class="wrap">
+      <p class="eyebrow">Benchmarks</p>
+      <h2>Fast where <em>real requests</em> spend their time.</h2>
+      <p class="sub">Requests per second on one 4-vCPU cloud VM, 2026-11-21. Every server got the same two CPUs, the same 40 database connections and the same load.</p>
+      <div class="bench-grid">
+        <figure class="bars">
+          <figcaption><b>Requests that wait.</b> Each request sleeps, then answers. 256 connections.</figcaption>
+          {{BARS}}
+        </figure>
+        <div class="table-scroll">
+          <table>
+            <caption>Median of three 10-second runs</caption>
+            <thead><tr><th scope="col">Case</th>{{BENCH_HEAD}}</tr></thead>
+            <tbody>{{BENCH_ROWS}}</tbody>
+          </table>
+        </div>
+      </div>
+      <p class="fine">Cairo in fiber mode with 4 threads, at commit ab6eab5. Swoole 4 processes; FrankenPHP, RoadRunner and FPM 40 workers. Swoole leads on hello, json and MySQL; Cairo leads on PostgreSQL and matches Swoole on sleeps and HTTP calls. Raw runs and scripts: <a href="https://github.com/cairophp/benchmarks">cairophp/benchmarks</a>.</p>
+    </div>
+  </section>
+
+  <section id="laravel" class="laravel">
+    <div class="wrap laravel-grid">
+      <div>
+        <p class="eyebrow">Laravel</p>
+        <h2>Your Laravel app, <em>on Cairo</em>.</h2>
+        <p>The <a href="https://github.com/cairophp/octane">cairophp/octane</a> driver runs Laravel Octane on Cairo. <b>Isolated mode</b> boots your app once per thread and runs one request at a time, like every Octane server. <b>Fiber mode</b> runs several requests per thread, each with its own booted app, while the others wait on I/O.</p>
+        <p><code>Octane::concurrently()</code> runs its tasks in fibers of the request, so their waits overlap instead of adding up.</p>
+        <a class="link-arrow" href="docs.html#frameworks">PSR-15, Symfony and Laravel {{ICON_ARROW}}</a>
+      </div>
+      <div class="term-card">{{CODE_OCTANE}}</div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap"><div class="final-card">
+      {{LOGO_BIG}}
+      <h2>Start serving in a minute.</h2>
+      <p>One binary for amd64 and arm64. No libc, no extensions to install, no <code>protoc</code>.</p>
+      <div class="cta">
+        <a class="btn btn-ink" href="docs.html#install">Read the docs {{ICON_ARROW}}</a>
+        <a class="btn btn-ghost" href="https://github.com/cairophp/cairo">{{ICON_GITHUB}} Star on GitHub</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-row">
+    <a class="brand" href="index.html">{{LOGO}}<span>Cairo</span></a>
+    <p>Apache License 2.0. Made in Cairo, with PHP and Go.</p>
+    <nav aria-label="Footer">
+      <a href="docs.html">Docs</a>
+      <a href="https://github.com/cairophp/cairo">Source</a>
+      <a href="https://github.com/cairophp/cairo/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/cairophp/benchmarks">Benchmarks</a>
+      <a href="logos.html">Logos</a>
+    </nav>
+  </div>
+</footer>

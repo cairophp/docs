@@ -14,7 +14,9 @@ repository.
 ## Start
 
 - [Install, supported platforms and known limitations](install.md)
+- [Docker: the official image](docker.md)
 - [How it works](how-it-works.md)
+- [Stability: what a release may change](stability.md)
 
 ## Serving
 
@@ -57,3 +59,13 @@ repository.
 A user-facing change in Cairo (a new or changed `Cairo\` API, CLI flag,
 install step or limitation) comes with a change here: open a pull request in
 this repository and link it from the Cairo pull request.
+
+These pages are also the website. `site/build.py` turns them into the landing
+page and the docs site, and `.github/workflows/site.yml` publishes the result
+with GitHub Pages on every push to `main`. A page appears there once it is in
+the lists above. To build the site yourself:
+
+```sh
+pip install -r site/requirements.txt
+python3 site/build.py .        # writes site/out/pages/
+```
