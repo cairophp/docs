@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Cairo">
+  <title>Cairo</title>
+  <!-- A C whose counter is a pyramid, on a tile of desert gold. -->
+  <defs>
+    <linearGradient id="lm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC861"/><stop offset="1" stop-color="#E8672B"/></linearGradient>
+    <mask id="lm-m">
+      <rect width="100" height="100" fill="#000"/>
+      <circle cx="50" cy="52" r="30" fill="#fff"/>
+      <path d="M46 37 L58 62 H34 Z" fill="#000"/>
+      <rect x="64" y="44" width="36" height="16" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x="4" y="4" width="92" height="92" rx="24" fill="url(#lm-g)"/>
+  <rect width="100" height="100" fill="#140E08" mask="url(#lm-m)"/></svg>

@@ -1,0 +1,134 @@
+<header class="top">
+  <div class="top-row">
+    <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-expanded="false" aria-controls="side" aria-label="Pages">{{ICON_MENU}}</button>
+    <a class="brand" href="index.html">{{LOGO}}<span>Cairo</span><small>docs</small></a>
+    <button type="button" class="search-btn" id="search-btn">{{ICON_SEARCH}}<span>Search the docs</span><kbd>/</kbd></button>
+    <nav aria-label="Main">
+      <a class="txt" href="index.html">Home</a>
+      <a class="txt" href="https://github.com/cairophp/cairo/blob/main/CHANGELOG.md">Changelog</a>
+      <a class="icon-btn" href="https://github.com/cairophp/cairo" aria-label="Cairo on GitHub">{{ICON_GITHUB}}</a>
+      <button type="button" class="icon-btn" id="theme-btn" aria-label="Switch light and dark">{{ICON_THEME}}</button>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" id="side" aria-label="Documentation">{{NAV}}</aside>
+  <main class="doc" id="doc">
+    {{PAGES}}
+  </main>
+  <aside class="toc" aria-label="On this page">
+    <p id="toc-h">On this page</p>
+    <ul id="toc"></ul>
+    <a class="edit" id="edit" href="https://github.com/cairophp/docs">{{ICON_EDIT}} Edit this page on GitHub</a>
+  </aside>
+</div>
+
+<div class="search-dlg" id="search-dlg" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the docs">
+    <input type="search" id="q" placeholder="Search the docs" autocomplete="off" aria-controls="results">
+    <ul class="results" id="results"></ul>
+  </div>
+</div>
+
+<script id="index-data" type="application/json">{{INDEX}}</script>
+<script>
+(function () {
+  var root = document.documentElement;
+  root.classList.add('js');
+  try { var t = localStorage.getItem('cairo-theme'); if (t) root.setAttribute('data-theme', t); } catch (e) {}
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var ids = pages.map(function (p) { return p.dataset.id; });
+  var links = document.querySelectorAll('.side a');
+  var side = document.getElementById('side');
+  var menu = document.getElementById('menu-btn');
+  var toc = document.getElementById('toc');
+  var edit = document.getElementById('edit');
+  var dlg = document.getElementById('search-dlg');
+  var q = document.getElementById('q');
+  var res = document.getElementById('results');
+  var index = JSON.parse(document.getElementById('index-data').textContent);
+  var heads = [];
+
+  function show(hash) {
+    var name = (hash || '').replace(/^#/, '');
+    var page = name.split('--')[0];
+    if (ids.indexOf(page) < 0) { page = 'overview'; name = ''; }
+    var el;
+    pages.forEach(function (p) { var on = p.dataset.id === page; p.classList.toggle('on', on); if (on) el = p; });
+    links.forEach(function (a) {
+      if (a.getAttribute('href') === '#' + page) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    document.title = page === 'overview' ? 'Cairo Docs' : el.dataset.title + ' · Cairo Docs';
+    edit.href = 'https://github.com/cairophp/docs/blob/main/' + el.dataset.src;
+    heads = Array.prototype.slice.call(el.querySelectorAll('h2, h3'));
+    toc.innerHTML = heads.map(function (h) {
+      return '<li><a class="' + h.tagName.toLowerCase().replace('h', 'l') + '" href="#' + h.id + '">' + esc(h.firstChild.textContent) + '</a></li>';
+    }).join('');
+    document.getElementById('toc-h').hidden = heads.length === 0;
+    side.classList.remove('open'); menu.setAttribute('aria-expanded', 'false');
+    var target = name.indexOf('--') > 0 ? document.getElementById(name) : null;
+    if (target) target.scrollIntoView(); else window.scrollTo(0, 0);
+    spy();
+  }
+
+  function spy() {
+    var cur = null;
+    heads.forEach(function (h) { if (h.getBoundingClientRect().top < 120) cur = h.id; });
+    toc.querySelectorAll('a').forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + cur); });
+  }
+
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function search(term) {
+    term = term.trim().toLowerCase();
+    if (term.length < 2) { res.innerHTML = ''; return; }
+    var out = [];
+    index.forEach(function (d) {
+      var at = d.text.toLowerCase().indexOf(term);
+      var inTitle = d.title.toLowerCase().indexOf(term) >= 0;
+      if (at < 0 && !inTitle) return;
+      var snip = '';
+      if (at >= 0) {
+        var s = Math.max(0, at - 60), e = Math.min(d.text.length, at + term.length + 80);
+        snip = (s > 0 ? '… ' : '') + esc(d.text.slice(s, at)) + '<mark>' + esc(d.text.slice(at, at + term.length)) + '</mark>' + esc(d.text.slice(at + term.length, e)) + (e < d.text.length ? ' …' : '');
+      }
+      out.push({ score: (inTitle ? 2 : 0) + (at >= 0 ? 1 : 0), html: '<li><a href="#' + d.id + '"><b>' + esc(d.title) + '</b>' + (snip ? '<span>' + snip + '</span>' : '') + '</a></li>' });
+    });
+    out.sort(function (a, b) { return b.score - a.score; });
+    res.innerHTML = out.length ? out.map(function (o) { return o.html; }).join('') : '<li class="empty">No page mentions “' + esc(term) + '”.</li>';
+  }
+
+  function openSearch() { dlg.hidden = false; q.value = ''; res.innerHTML = ''; q.focus(); }
+  function closeSearch() { dlg.hidden = true; }
+
+  document.getElementById('search-btn').addEventListener('click', openSearch);
+  dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target.closest('a')) closeSearch(); });
+  q.addEventListener('input', function () { search(q.value); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeSearch(); side.classList.remove('open'); }
+    else if ((e.key === '/' || (e.key === 'k' && (e.metaKey || e.ctrlKey))) && dlg.hidden && !/input|textarea/i.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
+    else if (e.key === 'Enter' && !dlg.hidden) { var a = res.querySelector('a'); if (a) { location.hash = a.getAttribute('href'); closeSearch(); } }
+  });
+  menu.addEventListener('click', function () {
+    var open = side.classList.toggle('open');
+    menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') ? root.getAttribute('data-theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('cairo-theme', next); } catch (e) {}
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.copy');
+    if (!b) return;
+    var code = b.parentNode.querySelector('pre').innerText;
+    var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+    try { navigator.clipboard.writeText(code).then(done, function () {}); } catch (err) {}
+  });
+  window.addEventListener('scroll', spy, { passive: true });
+  window.addEventListener('hashchange', function () { show(location.hash); });
+  show(location.hash);
+})();
+</script>
