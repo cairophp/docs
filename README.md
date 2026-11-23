@@ -48,6 +48,7 @@ repository.
 - [Isolated mode](isolated-mode.md)
 - [Frameworks: PSR-15, Symfony and Laravel](frameworks.md)
 - [Thread supervision](supervision.md)
+- [Metrics, health probes and tracing](observability.md)
 
 ## Tooling
 
