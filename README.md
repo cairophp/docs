@@ -45,6 +45,7 @@ repository.
 
 ## Running applications
 
+- [PHP command line: artisan, bin/console and Composer on the Cairo binary](cli.md)
 - [Isolated mode](isolated-mode.md)
 - [Frameworks: PSR-15, Symfony and Laravel](frameworks.md)
 - [Thread supervision](supervision.md)

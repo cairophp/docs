@@ -29,6 +29,9 @@ FROM ghcr.io/cairophp/cairo:0.5
 COPY --chown=cairo:cairo . /app
 ```
 
+The binary is PHP's command line too: `cairo php artisan migrate` runs a
+script with the PHP inside it ([PHP command line](cli.md)).
+
 To build it yourself, see [Building](building.md). For your IDE and PHPStan, add
 the stubs package ([IDE and static analysis](ide.md)).
 
@@ -56,7 +59,8 @@ the stubs package ([IDE and static analysis](ide.md)).
 - **Extensions.** The release binary has a fixed set of extensions
   ([Building](building.md)) and cannot load others (`dl()` is off). phpredis,
   imagick, mongodb and other PECL extensions are not included; build Cairo
-  yourself to add them, as long as they are thread-safe under ZTS.
+  yourself to add them, as long as they are thread-safe under ZTS. `pcntl`
+  is left out on purpose ([queue workers](cli.md#queue-workers-and-other-long-commands)).
 - **One process.** Cairo runs one process with many PHP threads; it does not
   fork. A fatal error in PHP kills only its thread, which is replaced, but a
   crash in C code takes the process down: run it under a supervisor

@@ -38,8 +38,34 @@ with `--chown=cairo:cairo` when the app writes to its own directory (logs, a
 cache, uploads), and mount volumes that uid 1000 may write to. A port below
 1024 needs `USER root` in your Dockerfile; publishing `-p 80:8080` does not.
 
-Install Composer packages in a build stage and copy `vendor/` over, since the
-image has no Composer and no `php` command:
+The image is also PHP's command line ([PHP command line](cli.md)): the
+binary runs scripts as `cairo php`, and `/usr/local/bin/php` is a link to it.
+So the commands of your app run in the same image as the app:
+
+```sh
+docker run --rm my-app php artisan migrate --force      # runs: cairo php artisan migrate --force
+docker run --rm my-app php bin/console cache:warmup
+```
+
+In Kubernetes that is an init container or a Job with
+`args: ["php", "artisan", "migrate", "--force"]`, and a queue worker is a
+Deployment of the same image with `args: ["php", "artisan", "queue:work"]`.
+
+Install Composer packages when you build the image. Composer is a PHP
+script, so it runs on the image as well, with the extensions the app will
+have:
+
+```dockerfile
+FROM ghcr.io/cairophp/cairo:0.5
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --chown=cairo:cairo . /app
+RUN php /usr/local/bin/composer install --no-dev --prefer-dist
+```
+
+Composer unpacks archives with PHP's zip extension here, since Alpine has no
+`unzip` and no `git` until you add them (`USER root`, `apk add --no-cache git
+unzip`, `USER cairo`). To keep Composer out of the final image, install in a
+build stage and copy `vendor/` over:
 
 ```dockerfile
 FROM composer:2 AS vendor
@@ -57,20 +83,37 @@ Kubernetes send: it finishes the requests in flight for up to `--grace`
 (30 s). Give the container at least that long (`docker stop -t 35`,
 `terminationGracePeriodSeconds`).
 
-## When you need the `php` command too
+## Laravel in the image
 
-The image has no PHP CLI, so it cannot run `php artisan`, `bin/console` or
-Composer scripts. Where the app needs them (Laravel through Octane starts
-with `php artisan octane:start`), start from a PHP image and copy the binary
-in. It is static, so it runs on any Linux image:
+Laravel runs on Cairo through Octane and the
+[Cairo driver](https://github.com/cairophp/octane). Octane's own start
+command, `php artisan octane:start`, needs the `pcntl` extension, which the
+binary leaves out ([why](cli.md#queue-workers-and-other-long-commands)). In
+the image, start the server file that the command would start, with its
+settings in the environment:
 
 ```dockerfile
-FROM php:8.5-cli
-COPY --from=ghcr.io/cairophp/cairo:0.5 /usr/local/bin/cairo /usr/local/bin/cairo
+FROM ghcr.io/cairophp/cairo:0.5
+COPY --chown=cairo:cairo . /app
+ENV LARAVEL_OCTANE=1 \
+    APP_BASE_PATH=/app \
+    CAIRO_OCTANE_HOST=0.0.0.0 \
+    CAIRO_OCTANE_PORT=8080 \
+    CAIRO_OCTANE_PUBLIC_PATH=/app/public
+CMD ["serve", "vendor/cairophp/laravel-octane/bin/cairo-worker.php"]
 ```
 
-Keep that image's PHP at the version inside Cairo (8.5 for the release
-binary), so that the commands and the server agree on what the code may use.
+`CAIRO_OCTANE_MODE=fibers`, `CAIRO_OCTANE_CONCURRENCY`, `CAIRO_OCTANE_WORKERS`
+and `CAIRO_OCTANE_MAX_REQUESTS` are the command's `--mode`, `--concurrency`,
+`--workers` and `--max-requests`. Cairo is then the container's own process,
+so `docker stop` reaches it without a command in between. Migrations, queue
+workers and the scheduler run from the same image:
+
+```sh
+docker run --rm my-app php artisan migrate --force
+docker run -d my-app php artisan queue:work
+docker run -d my-app php artisan schedule:work
+```
 
 ## macOS and Windows
 
