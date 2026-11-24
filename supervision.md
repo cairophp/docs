@@ -26,6 +26,41 @@ Requests over the cap wait in Go until one finishes, or until their own
 deadline. A waiting request costs a goroutine, not PHP memory.
 `examples/supervise` shows both.
 
+## When opcache has to restart
+
+opcache keeps the compiled code of every PHP thread in one shared memory. It
+empties that memory and starts over when it is full and part of it is stale
+(the code of files that have changed on disk since), or when the app calls
+`opcache_reset()`. PHP can only do that safely when nothing runs code from the
+cache, which in a server of threads means: in a new process.
+
+So when opcache asks for its restart, Cairo starts no PHP thread any more.
+The threads that run serve on. The next time a thread would start (one is
+recycled, or one has died), the server stops as it does on SIGTERM, with the
+requests in flight finished, and starts anew in place, under the same process
+id:
+
+```
+level=WARN msg="restarting in place" because="no PHP thread can start until the process has started anew: opcache's memory is full (opcache.memory_consumption)"
+```
+
+Until the new process listens, connections are refused: for as long as your
+app takes to start, after the requests in flight. To make it rare:
+
+- Give opcache room for your code: `opcache.memory_consumption` (128 MB by
+  default) and `opcache.max_accelerated_files`. The log names the one that
+  ran out.
+- Do not call `opcache_reset()` in a deploy, as is done for PHP-FPM. Restart
+  the server instead: a new process has an empty cache.
+- Restart the server when you deploy. Threads that are recycled later read
+  the files as they are on disk then, and each changed file leaves its old
+  code behind in the cache.
+
+This needs PHP 8.4 or newer, where opcache tells Cairo of the restart. The
+released binary and the image have PHP 8.5. A Cairo that you build against
+PHP 8.1 to 8.3 cannot see the restart coming: there it ends the process with
+`zend_mm_heap corrupted`, so the three points above are what keeps it away.
+
 ## Stopping the server
 
 On SIGINT or SIGTERM Cairo stops accepting connections and waits for the
