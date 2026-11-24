@@ -83,6 +83,14 @@ Kubernetes send: it finishes the requests in flight for up to `--grace`
 (30 s). Give the container at least that long (`docker stop -t 35`,
 `terminationGracePeriodSeconds`).
 
+A CPU limit (`docker run --cpus=2`, a limit in Kubernetes) does not set the
+number of PHP threads: Cairo starts one for each CPU of the machine, and
+as many for `offload()`, unless you say how many (`$app->threads(4)`,
+`$app->offloadThreads(2)`, or `--threads` and `--offload-threads`). On a
+large machine with a small limit, say it, or the threads share the little
+CPU time the limit gives. Go's side of Cairo counts the CPUs of the limit
+itself.
+
 ## Laravel in the image
 
 Laravel runs on Cairo through Octane and the
