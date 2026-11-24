@@ -52,6 +52,7 @@ repository.
 - [PHP command line: artisan, bin/console and Composer on the Cairo binary](cli.md)
 - [Isolated mode](isolated-mode.md)
 - [Frameworks: PSR-15, Symfony and Laravel](frameworks.md)
+- [Compatibility: the apps and frameworks tested on Cairo](compatibility.md)
 - [Reloading the code: `--watch` and the reload signal](reload.md)
 - [Thread supervision](supervision.md)
 - [Metrics, health probes and tracing](observability.md)
