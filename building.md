@@ -35,7 +35,7 @@ request deadlines come from `Middleware::timeout()` and gRPC deadlines. `dl()`
 is not available. One setting is worth adding for apps that use MySQL:
 [`mysqlnd.collect_statistics = 0`](mysql.md#recommended-turn-off-mysqlnds-statistics).
 
-Requirements: Go 1.24+, a C toolchain, the -dev packages listed in `scripts/build-php.sh`, and PHP 8.1 or newer (fibers).
+Requirements: Go 1.27+, a C toolchain, the -dev packages listed in `scripts/build-php.sh`, and PHP 8.1 or newer (fibers).
 
 ## One static binary
 
