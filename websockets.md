@@ -82,6 +82,29 @@ refused by this: check its token in the handler.
 choose from, in your order of preference; `$ws->protocol` says which it
 chose.
 
+### A server that is only WebSockets
+
+A server needs no other routes than its sockets, and `fallback()` answers
+with a socket on every path:
+
+```php
+$ws = $app->http(':9000');
+
+$ws->fallback(function (Request $req): Response {
+    $room = 'room.' . trim($req->path(), '/');   // ws://host:9000/42 is room.42
+    return Response::websocket(function (WebSocket $socket) use ($room): void {
+        $socket->subscribe($room);
+        while (($message = $socket->receive()) !== null) {
+            Topic::publish($room, $message->data);
+        }
+    });
+});
+```
+
+A route of `GET /` matches every path that no other route does, so it
+would take these requests before the fallback sees them: write the root
+alone as `/{$}`.
+
 ### Limits
 
 | Option of `Response::websocket()` | Default | What it bounds |
