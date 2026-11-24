@@ -87,10 +87,10 @@ Kubernetes send: it finishes the requests in flight for up to `--grace`
 
 Laravel runs on Cairo through Octane and the
 [Cairo driver](https://github.com/cairophp/octane). Octane's own start
-command, `php artisan octane:start`, needs the `pcntl` extension, which the
-binary leaves out ([why](cli.md#queue-workers-and-other-long-commands)). In
-the image, start the server file that the command would start, with its
-settings in the environment:
+command, `php artisan octane:start`, runs on the binary too, but it is a
+second process that starts Cairo and passes signals on. In the image, start
+the server file that the command would start, with its settings in the
+environment:
 
 ```dockerfile
 FROM ghcr.io/cairophp/cairo:0.5
