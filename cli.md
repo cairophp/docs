@@ -250,7 +250,7 @@ What to know:
   [`CAIRO_SCHEDULER=off`](#programs-with-their-own-event-loop), where its
   signals work as well.
 - A signal reaches the script a moment after it reached the process,
-  through Go: about a tenth of a millisecond. A script that sends itself a
+  through Go: about a fifth of a millisecond. A script that sends itself a
   signal and calls `pcntl_signal_dispatch()` in the next statement finds
   nothing yet. A signal that arrives while the script's last statement
   runs is not handled, as under PHP.
