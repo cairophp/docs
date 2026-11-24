@@ -24,6 +24,7 @@ repository.
 - [gRPC](grpc.md)
 - [Middleware](middleware.md)
 - [Response cache](response-cache.md)
+- [Streamed answers, Server-Sent Events and files](streaming.md)
 - [TLS for outgoing connections](tls.md)
 
 ## Concurrency

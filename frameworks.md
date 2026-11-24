@@ -14,7 +14,11 @@ any method. PSR-15 handlers get a PSR-7 request built with nyholm/psr7 or
 guzzlehttp/psr7, whichever is installed. It carries headers, query, cookies,
 the parsed form, uploaded files, and route parameters as attributes. Symfony
 and Laravel kernels get an HttpFoundation request, and `terminate()` runs
-after the response is sent. Streamed responses work too. The request's
+after the response is sent and may use the database as a handler does.
+Streamed responses (`StreamedResponse`, Laravel's `response()->stream()`
+and `eventStream()`) are sent while their callback writes them, and file
+responses are sent in pieces, or by Go once the app trusts `X-Sendfile`:
+see [Streamed answers](streaming.md). The request's
 `Cairo\Context` is the `cairo.context` attribute. `Cairo\Http\Adapter` does the
 conversions by hand: `psr15()`, `symfony()`, `toPsr7()`, `fromPsr7()`,
 `toSymfony()` and `fromSymfony()`.
