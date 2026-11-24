@@ -26,16 +26,81 @@ A script runs as it does under `php`:
 - The exit status is the script's: `exit(3)` ends the command with 3, and an
   uncaught exception or a fatal error with 255.
 - A first line that starts with `#!` is skipped.
-- The `Cairo\` classes exist, so code shared with the server loads. No
-  server and no scheduler runs: `sleep()`, sockets and queries block the
-  script as they do in PHP, also inside a Fiber the script made itself.
+- The `Cairo\` classes exist, and the script runs under Cairo's scheduler,
+  as a request does. No server starts.
 
-Cairo's concurrency API works without the scheduler where it can:
-`Cairo\async()` runs its task to the end before it returns, so `await()` and
-`all()` have their results; `offload()` runs the job in place; `Cairo\sleep()`
-blocks. A command therefore runs one after the other what a request runs at
-the same time, and code that both share works in both. A `Channel` that has
-to wait for another fiber throws a `LogicException`.
+## Concurrency in a script
+
+Any script that `cairo php` runs can use what a request uses:
+[`async()`, `await()`, channels and `select()`](concurrency.md),
+[contexts with a deadline](context.md) and the waits that suspend only their
+fiber. Nothing has to be declared or started first:
+
+```php
+<?php
+// report.php
+use function Cairo\{async, await, all};
+
+$count = static function (string $sql): int {
+    $pdo = new PDO(getenv('DB_DSN'), getenv('DB_USER'), getenv('DB_PASSWORD'));
+    return (int) $pdo->query($sql)->fetchColumn();
+};
+
+$tasks = [
+    'orders' => async(fn () => $count('SELECT count(*) FROM orders')),
+    'invoices' => async(fn () => $count('SELECT count(*) FROM invoices')),
+    'refunds' => async(fn () => $count('SELECT count(*) FROM refunds')),
+];
+print_r(await(all($tasks)));   // the three queries run at the same time
+```
+
+```sh
+cairo php report.php
+```
+
+The script itself is a fiber, the first one, and each `async()` starts
+another on the same thread. `sleep()`, sockets, curl, PDO and the `Cairo\`
+clients suspend the fiber that waits and the others go on: 50 tasks that each
+sleep one second end after one second, and 20 tasks that each run a
+one-second query end after about one second too, each on a connection of its
+own.
+
+What to know:
+
+- **A script that starts no task pays nothing.** While the script is the only
+  fiber that could run, a wait blocks the thread as it does under `php`, with
+  no turn through the scheduler. `artisan`, Composer and a script of your own
+  run as they did.
+- **Tasks end with the script.** When the script comes to its end, or calls
+  `exit()`, the tasks nobody waited for are canceled: their context ends, and
+  with it what they wait for. `await()` what has to finish.
+- **`offload()` runs the job in place.** A command has one PHP thread; the
+  offload pool is the server's.
+- **The script's variables are the globals**, its stack is the bottom of the
+  backtrace, and it has 16 MiB of stack for deep recursion. A task has
+  `fiber.stack_size` (2 MiB unless you set it), as in a request.
+- **Shutdown functions and destructors that run after the script** run with
+  no scheduler: a wait there blocks, and `async()` runs its task to the end
+  before it returns.
+- **A wait that nothing can end stops the command.** When every fiber is
+  asleep and no timer, socket or operation could wake one (a `recv()` on a
+  channel that nobody sends to), Cairo says so on standard error and the
+  status is 255, instead of hanging.
+
+### Programs with their own event loop
+
+A library with an event loop of its own for fibers, such as amphp v3 on
+Revolt, suspends the script's fiber and expects its own loop to resume it.
+Under Cairo's scheduler nothing does, and the command ends with the message
+above. Run such a program outside the scheduler:
+
+```sh
+CAIRO_SCHEDULER=off cairo php worker.php
+```
+
+The script then runs as under `php`, in no fiber: waits block, `async()` runs
+its task to the end before it returns, and a `Channel` that has to wait for
+another fiber throws a `LogicException`.
 
 ## Options
 
@@ -116,8 +181,10 @@ runtime owns the process's signals and threads, and PHP's handlers and
 
 A command starts in about the time of `php` plus the start of the Cairo
 binary: on the machine these pages were measured on, `cairo php -r ''` took
-35 ms against 20 ms for the PHP 8.5 command line. Opcache follows
+35 ms against 20 ms for the PHP 8.5 command line, with the scheduler or
+without it. Opcache follows
 `opcache.enable_cli`, which is off unless your `php.ini` turns it on.
 
 `examples/cli` in the Cairo repository has a command that reads its
-arguments, standard input and a database.
+arguments, standard input and a database, and one that runs its queries at
+the same time (`together`).
