@@ -14,7 +14,7 @@ Or with Docker: `docker build -t cairo . && docker run -p 8080:8080 -p 9000:9000
 
 `make php` builds PHP with opcache and the extensions most applications
 expect: mbstring, intl, openssl, sodium, zip, gd (JPEG, WebP, FreeType), bcmath,
-gmp, calendar, exif, sockets, iconv, zlib, bz2, curl, PDO with MySQL and SQLite,
+gmp, calendar, exif, sockets, pcntl ([for scripts](cli.md#signals)), iconv, zlib, bz2, curl, PDO with MySQL and SQLite,
 mysqli, sqlite3, and PHP's defaults (ctype, dom, fileinfo, filter, json,
 session, simplexml, tokenizer, xml and the rest). `scripts/build-php.sh` lists
 the system packages they need.

@@ -60,7 +60,8 @@ the stubs package ([IDE and static analysis](ide.md)).
   ([Building](building.md)) and cannot load others (`dl()` is off). phpredis,
   imagick, mongodb and other PECL extensions are not included; build Cairo
   yourself to add them, as long as they are thread-safe under ZTS. `pcntl`
-  is left out on purpose ([queue workers](cli.md#queue-workers-and-other-long-commands)).
+  is there for the scripts of `cairo php` only, without `pcntl_fork()`
+  ([signals](cli.md#signals)).
 - **One process.** Cairo runs one process with many PHP threads; it does not
   fork. A fatal error in PHP kills only its thread, which is replaced, but a
   crash in C code takes the process down: run it under a supervisor

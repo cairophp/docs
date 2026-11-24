@@ -163,19 +163,144 @@ A worker is a script like any other: `cairo php artisan queue:work`,
 One process runs one worker; start as many as you need under your supervisor
 (systemd, Kubernetes, Supervisor), as with PHP.
 
-The binary has no `pcntl` extension, so a script cannot handle signals:
+A worker stops as it does under PHP, because the binary [handles
+signals](#signals) for scripts:
 
-- `SIGTERM` and `SIGINT` end the command at once, in the middle of a job
-  too. Laravel releases such a job again after the queue's `retry_after`.
-  To stop workers between jobs, use `artisan queue:restart`
-  (`messenger:stop-workers` in Symfony), or let them end by themselves with
-  `--max-jobs` and `--max-time`.
-- A worker does not enforce a job's `--timeout`.
-- Packages that require `ext-pcntl`, such as Laravel Horizon, do not install.
+- `SIGTERM` is what `docker stop`, Kubernetes, systemd and Supervisor send.
+  Laravel's `queue:work` finishes the job in hand and then ends, and
+  Symfony's `messenger:consume` does the same.
+- A job that runs past the worker's `--timeout` ends the worker, which your
+  supervisor starts again.
+- `SIGINT` (Ctrl-C) reaches a console command that listens for it.
 
-When you [build Cairo yourself](building.md), do not add `pcntl`: Go's
-runtime owns the process's signals and threads, and PHP's handlers and
-`pcntl_fork()` are not safe next to it.
+## Signals
+
+The binary has PHP's own `pcntl` extension for scripts, so code that handles
+signals runs unchanged:
+
+```php
+pcntl_async_signals(true);
+pcntl_signal(SIGTERM, function () use (&$stop): void {
+    $stop = true;
+});
+pcntl_alarm(60);
+```
+
+`pcntl_signal()`, `pcntl_async_signals()`, `pcntl_signal_dispatch()`,
+`pcntl_signal_get_handler()`, `pcntl_alarm()`, the `SIG*` constants and the
+rest of the extension are there, and `extension_loaded('pcntl')` is true,
+which is what Laravel, Symfony and Composer ask before they use it.
+
+What differs from `php` is who receives the signal. The system delivers a
+signal to any thread of a process, and most threads of the binary are Go's,
+where no PHP runs. So Go receives the signal and brings it to the script,
+which handles it in one of two ways:
+
+- **A script that runs one fiber at a time**, which is every script that
+  does not use `async()`, is interrupted as under PHP. The handler runs at
+  the script's next statement. A `sleep()`, `usleep()` or `stream_select()`
+  in progress returns early, and an exception that the handler throws
+  arrives in the code that was running.
+- **A script with several fibers** has its handler run inside a fiber, at
+  once: in the fiber that is running, at its next statement, or, while all
+  of them wait, in a fiber that Cairo keeps for this. The waits of the
+  other fibers are not cut short: a fiber in `sleep(30)` sleeps on.
+
+A handler is for a note, not for work. PHP lets no fiber switch while a
+handler runs, so with several fibers a handler that waits (a query,
+`sleep()`, `Cairo\sleep()`, `await()`, a `send()` to a full channel) gets a
+`FiberError`, "Cannot switch fibers in current execution context". It sets
+a flag, or hands the signal to a fiber over a channel with `trySend()`,
+which never waits, and the fiber does the work. A script that runs one
+fiber at a time is the exception: there a handler waits with the thread
+through PHP's own functions, as under PHP, and a Laravel worker's timeout
+handler does its queries.
+
+```php
+$stop = new Cairo\Channel(1);
+pcntl_signal(SIGTERM, static fn () => $stop->trySend(true));
+
+$running = true;
+$worker = Cairo\async(function () use (&$running): void {
+    while ($running) {
+        work();           // its waits suspend only this fiber
+    }
+});
+
+$stop->recv();            // the script waits here for SIGTERM
+$running = false;
+Cairo\await($worker);     // the job in hand finishes
+```
+
+What to know:
+
+- An exception that a handler throws while every fiber waits has no running
+  code to arrive in. It ends the command as an uncaught exception, with
+  status 255.
+- Left out: `pcntl_fork()`, `pcntl_rfork()` and `pcntl_forkx()`, because a
+  fork copies one thread of a process that has many, Go's among them; and
+  `pcntl_sigwaitinfo()` and `pcntl_sigtimedwait()`, because no signal
+  arrives on its own on a thread that waits for one. Code that asks with
+  `function_exists()` first does without them: `artisan tinker` runs, and
+  does not fork.
+- A script that handles a signal is never [a script that nothing can
+  wake](#concurrency-in-a-script): a signal could. A program with an event
+  loop of its own for fibers that also handles signals waits for ever
+  under the scheduler, with no message. Run it with
+  [`CAIRO_SCHEDULER=off`](#programs-with-their-own-event-loop), where its
+  signals work as well.
+- A signal reaches the script a moment after it reached the process,
+  through Go: about a tenth of a millisecond. A script that sends itself a
+  signal and calls `pcntl_signal_dispatch()` in the next statement finds
+  nothing yet. A signal that arrives while the script's last statement
+  runs is not handled, as under PHP.
+- A signal that the script has no handler for does what it does to the
+  Cairo binary. `SIGINT`, `SIGTERM` and `SIGHUP` end the command, as under
+  PHP. `SIGUSR1`, `SIGUSR2` and `SIGALRM` are ignored, where `php` would
+  end: a `pcntl_alarm()` with no handler for `SIGALRM` does nothing.
+- The server has none of this. In `cairo serve` the `pcntl_*` functions do
+  not exist, although `extension_loaded('pcntl')` is true there too: a
+  handler in a request would take the signals that stop the server.
+
+`examples/cli/signals.php` in the Cairo repository has a worker that stops
+after the job in hand, a job with a time limit, and a script that waits for
+a signal on a channel.
+
+## Commands in another PHP
+
+A command may need what an ordinary PHP has and the one in the binary does
+not: `pcntl_fork()`, an extension that you compiled for your own PHP, the
+interactive shell. Name that PHP in `CAIRO_PHP_CLI`, and Cairo hands every
+command to it:
+
+```sh
+export CAIRO_PHP_CLI=/usr/bin/php     # a path, or a name on PATH
+cairo php artisan horizon             # runs /usr/bin/php artisan horizon
+```
+
+This is how servers that keep PHP's command line apart from the server
+work, FrankenPHP's image among them. It applies to `cairo php`, to the
+[name `php`](#the-name-php) and to the commands that PHP code starts through
+`PHP_BINARY`. The process becomes that PHP: the arguments, the signals and
+the exit status are its own. The server is not affected: `cairo serve`
+always runs the PHP in the binary.
+
+What to know:
+
+- It is another PHP. It has no `Cairo\` classes and no scheduler, it reads
+  its own `php.ini`, and it has the extensions that it was built with:
+  PostgreSQL needs its `pdo_pgsql`, and a version or an extension that
+  differs from the server's shows only in commands.
+- Cairo refuses a `CAIRO_PHP_CLI` that names the Cairo binary itself, under
+  any name, the `php` link included.
+- In an image, start from one that has PHP and add the binary:
+
+  ```dockerfile
+  FROM php:8.5-cli
+  RUN docker-php-ext-install pcntl pdo_mysql
+  COPY --from=ghcr.io/cairophp/cairo:latest /usr/local/bin/cairo /usr/local/bin/cairo
+  ENV CAIRO_PHP_CLI=/usr/local/bin/php
+  ```
 
 ## Starting up
 
