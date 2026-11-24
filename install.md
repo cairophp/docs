@@ -66,5 +66,5 @@ the stubs package ([IDE and static analysis](ide.md)).
   fork. A fatal error in PHP kills only its thread, which is replaced, but a
   crash in C code takes the process down: run it under a supervisor
   (systemd, Kubernetes) that restarts it.
-- **Not included:** HTTP/3, automatic TLS certificates, and a file watcher
-  for development reloads.
+- **Not included:** HTTP/3, response compression, and a file watcher for
+  development reloads.

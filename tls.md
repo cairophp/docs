@@ -1,4 +1,7 @@
-# TLS
+# TLS for outgoing connections
+
+This page is about the connections PHP opens. For serving HTTPS, see
+[HTTPS and HTTP/2](https.md).
 
 Cairo provides the `ssl://`, `tls://` and `tlsv1.x://` transports itself, and
 an `https://` wrapper when PHP has none. Go's `crypto/tls` does the handshake

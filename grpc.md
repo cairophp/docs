@@ -81,6 +81,10 @@ for each.
 Health checking (`grpc.health.v1`) and server reflection are built in, so
 `grpcurl -plaintext localhost:9000 list` works.
 
+To serve gRPC over TLS, give the server a certificate:
+`$app->grpc(':9000')->tls($certFile, $keyFile)`. The two PEM files are read
+again when they change; see [HTTPS and HTTP/2](https.md).
+
 Calling gRPC services: the generated client carries its `.proto` descriptors,
 and `Cairo\Grpc\Client` takes arrays with `.proto` files. Calls run through
 grpc-go on a goroutine in Go (only the fiber waits, and the request's
