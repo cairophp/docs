@@ -26,6 +26,7 @@ repository.
 - [Response cache](response-cache.md)
 - [Streamed answers, Server-Sent Events and files](streaming.md)
 - [WebSockets and topics](websockets.md)
+- [The Mercure hub](mercure.md)
 - [TLS for outgoing connections](tls.md)
 
 ## Concurrency

@@ -5,6 +5,10 @@ the release's static binary on Alpine, and nothing else: PHP 8.5, opcache and
 the extensions are inside the binary
 ([what the release binary has](building.md)).
 
+The binary contains the [Mercure hub](mercure.md), which is licensed under
+the AGPL-3.0 and not, like Cairo, under Apache-2.0. The licenses are in the
+image, in `/usr/share/licenses/cairo`.
+
 | Tag | What it follows |
 |---|---|
 | `0.5.0` | That release, never moved |

@@ -9,6 +9,11 @@ curl -fsSL https://raw.githubusercontent.com/cairophp/cairo/main/install.sh | ba
 cairo version
 ```
 
+The binary contains the [Mercure hub](mercure.md), which is licensed under
+the AGPL-3.0 and not, like Cairo, under Apache-2.0;
+[a binary without it](mercure.md#a-binary-without-the-hub) is built from
+source.
+
 The script picks the binary for your machine and checks it against the
 release's `SHA256SUMS` before it installs anything. `CAIRO_VERSION=v0.5.0`
 picks a release and `CAIRO_INSTALL_DIR` another directory. To do the same by
