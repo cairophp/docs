@@ -21,6 +21,12 @@ finishes the requests it holds before it exits. No request fails. For the
 length of the boot the old thread serves past `maxRequests()`, and both
 threads hold their memory.
 
+The replacement reads the code that is on disk now. When that does not start
+(a parse error, an exception in `server.php`, or other servers and routes
+than the running server has), the old thread stays and serves on, and Cairo
+tries again after 1 s, 2 s, 4 s and so on, a minute at most. The log says
+`php thread not replaced` each time, with PHP's error above it.
+
 `$app->maxInFlight(100)` caps the requests each request thread holds at once.
 Requests over the cap wait in Go until one finishes, or until their own
 deadline. A waiting request costs a goroutine, not PHP memory.
@@ -52,9 +58,11 @@ app takes to start, after the requests in flight. To make it rare:
   ran out.
 - Do not call `opcache_reset()` in a deploy, as is done for PHP-FPM. Restart
   the server instead: a new process has an empty cache.
-- Restart the server when you deploy. Threads that are recycled later read
+- Give the server its new code on purpose when you deploy, with a
+  [reload](reload.md) or a restart. Threads that are recycled later read
   the files as they are on disk then, and each changed file leaves its old
-  code behind in the cache.
+  code behind in the cache. A reload does too, so a server that is reloaded
+  many times between restarts needs more room.
 
 This needs PHP 8.4 or newer, where opcache tells Cairo of the restart. The
 released binary and the image have PHP 8.5. A Cairo that you build against
