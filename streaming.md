@@ -105,6 +105,10 @@ descriptor for each connection (`ulimit -n`), and Linux gives a process
 65,530 memory mappings unless `vm.max_map_count` is raised, which is about
 32,000 fibers in the whole process.
 
+When the clients mostly wait for the same events, they need no fiber at
+all: [`Response::eventsFrom()`](websockets.md#topics) names the topics a
+client listens to, and Go serves it from there.
+
 ## Early Hints
 
 A browser can start on what a page needs while the handler still makes the
