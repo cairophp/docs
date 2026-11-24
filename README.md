@@ -25,6 +25,7 @@ repository.
 - [Middleware](middleware.md)
 - [Response cache](response-cache.md)
 - [Streamed answers, Server-Sent Events and files](streaming.md)
+- [The Mercure hub](mercure.md)
 - [TLS for outgoing connections](tls.md)
 
 ## Concurrency
