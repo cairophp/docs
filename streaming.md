@@ -51,6 +51,13 @@ stream that is alive. It bounds each write of a stream instead: a client
 that reads, however slowly, stays, and one that stops reading for that long
 is dropped.
 
+A server that stops does not wait for its streams, which have no end of
+their own. Each is refused its next `write()` or `send()` with
+`Context\Canceled`, as when its client has left: the handler ends, what it
+had sent is delivered, and the client connects again, to the new server.
+A handler that neither writes nor ends holds the stop for the grace time
+(`--grace`, 30 seconds), so let a quiet stream send a comment now and then.
+
 ## Server-Sent Events
 
 ```php
