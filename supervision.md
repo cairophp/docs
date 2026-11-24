@@ -29,7 +29,10 @@ deadline. A waiting request costs a goroutine, not PHP memory.
 ## Stopping the server
 
 On SIGINT or SIGTERM Cairo stops accepting connections and waits for the
-requests in flight, for `--grace` at most (30 s by default). Then each PHP
+requests in flight, for `--grace` at most (30 s by default). With
+`--drain 5s` it first keeps serving for that long while its
+[readiness probe](observability.md) answers 503, so a load balancer stops
+sending before connections close. Then each PHP
 thread finishes what it still holds before it ends: a request whose client
 has left runs to its end, `finally` blocks included, and a fiber that still
 waits for an answer from Go gets it first. Once the grace time is over, the
