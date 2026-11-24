@@ -16,7 +16,9 @@ $http->get('/legacy', function (): void {     // classic PHP works
 
 In isolated mode Cairo fills `$_GET`, `$_POST` (url-encoded and multipart
 forms), `$_FILES`, `$_COOKIE`, `$_SERVER` and `$_REQUEST`; a handler that returns nothing answers with what it
-echoed, its `header()` calls and `http_response_code()`. After each request it
+echoed, its `header()` calls and `http_response_code()`. `flush()` sends what
+was echoed so far, and `headers_send(103)` and `fastcgi_finish_request()`
+work as under other PHP servers: see [Streamed answers](streaming.md). After each request it
 clears the superglobals and calls `reset()` on everything given to
 `resetAfterRequest()` (any object with a `reset()` method, such as
 `Cairo\Resettable` or Symfony's `ResetInterface`, or a callable). Requests that
