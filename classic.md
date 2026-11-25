@@ -54,12 +54,23 @@ As under PHP-FPM:
   the answer. `flush()` sends what was echoed so far, and
   `fastcgi_finish_request()` works ([Streamed answers](streaming.md)).
 - PHP's own sessions (`session_start()`), one per request.
-- `putenv()` changes the request's own environment, which `getenv()` reads
-  first: no other request sees it, on its thread or another. The process's
-  environment is only read: PHP's `putenv()` would write it while other
-  threads read it, which crashes the process (Laravel's `.env` loader calls
-  it on every request). C libraries that read the environment themselves
-  (libpq, curl's proxy settings) do not see a `putenv()`.
+- The environment functions work as under PHP-FPM. The request's CGI
+  variables (`REQUEST_METHOD`, `REMOTE_ADDR`, `HTTP_HOST` and the other
+  headers, `SCRIPT_FILENAME`, ...) are its environment: `getenv()` finds them
+  first, `getenv()` with no name and `$_ENV` list them, and a change the
+  script makes to `$_SERVER` does not change them. Then come what the
+  request set with `putenv()` and the process's environment.
+  `getenv($name, true)` skips the CGI variables.
+- `putenv()` changes the request's own environment: no other request sees
+  it, on its thread or another. The process's environment is only read:
+  PHP's `putenv()` would write it while other threads read it, which crashes
+  the process (Laravel's `.env` loader calls it on every request). This is
+  the one difference from PHP-FPM, where each worker is a process of its
+  own: C libraries that read the environment themselves (libpq, curl's proxy
+  settings) do not see a `putenv()`.
+- `$_SERVER` holds the request's variables, not the process's environment,
+  as under PHP-FPM's default `clear_env = yes`; read the environment with
+  `getenv()`.
 - A fatal error ends that request only: the client gets a 500 and the thread
   takes the next request in a fresh PHP request.
 
