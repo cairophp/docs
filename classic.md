@@ -38,6 +38,41 @@ Without an `index.php` at the root, a path that names no script and no file
 is a 404. A PHP file is never sent as a file, and every lookup stays inside
 the directory, symlinks included.
 
+## Serving with no declaration
+
+A folder, or a PHP file that declares no `Cairo\App`, needs no server.php:
+`cairo serve` serves it as nginx and PHP-FPM do, in classic mode.
+
+```sh
+cairo serve wordpress/                       # a folder: the table above
+cairo serve public/index.php --listen :80    # a front controller: Laravel, Slim, your own
+```
+
+| You give | What answers |
+|---|---|
+| a folder | the table above, with the folder as the document root |
+| a plain PHP file | the same, with the file's folder as the root and the file as the front controller |
+| a file that names `Cairo\App` (`new App()`, `use Cairo\App;`) | what the file declares, in the mode it declares |
+| a Symfony front controller with `cairophp/symfony-runtime` chosen | what the runtime declares |
+
+Cairo reads the file with PHP's tokenizer to tell which it is, and never runs
+it to find out. The settings come from the command line: `--listen` (default
+`:8080`), `--threads` (default: one per CPU core; size it as you would
+`pm.max_children`), `--timeout` (a request's deadline, as
+`Middleware::timeout()` below), `--php-ini`, `--watch`. Without
+`--timeout`, php.ini's `max_execution_time` is the deadline, as under
+PHP-FPM, but in wall time (PHP-FPM counts CPU time on Linux), and
+`set_time_limit()` does not change it. With neither, a request has no
+deadline.
+
+Nothing of the app runs before a request: each request runs only its script,
+so every request behaves the same, as under PHP-FPM. A setting that every
+script needs goes in php.ini, or in a file that php.ini's `auto_prepend_file`
+names. Apart from the deadline, there is no Go middleware without a declaration.
+Cairo's concurrency API (`Cairo\async()`, `await()`, `select()`,
+`Cairo\sleep()`, `offload()`, `Cairo\Pool`) works in such a script as in a
+declared one, and the rest of Cairo's runtime loads only when a script uses it.
+
 ## What a script gets
 
 As under PHP-FPM:
