@@ -57,9 +57,35 @@ As under PHP-FPM:
 - A fatal error ends that request only: the client gets a 500 and the thread
   takes the next request in a fresh PHP request.
 
-Inside a request, Cairo's concurrency API still works: `Cairo\async()` runs a
-function in a fiber of the request, and its waits (PDO, curl, `sleep()`,
-streams) overlap ([Concurrency API](concurrency.md)).
+The script runs on its thread's own stack, not in a fiber, as it does under
+PHP-FPM: its own waits (PDO, curl, `sleep()`, streams) hold the thread, as
+they would hold a PHP-FPM worker. The request's deadline
+(`Middleware::timeout()`) still stops the script: one that computes, and one
+that waits on a socket (PDO MySQL, streams) or in `sleep()`, which then throws
+`Cairo\Context\DeadlineExceeded`, so a stuck query does not keep its thread
+from the requests behind it. A wait inside curl or PDO PostgreSQL in the
+script itself is not cut short. Cairo's concurrency API still works there: `Cairo\async()` runs a
+function in a fiber of the request, whose waits overlap, and `await()`,
+channels, `select()`, `offload()` and `Cairo\sleep()` let those fibers run
+while the script waits ([Concurrency API](concurrency.md)).
+
+## Database connections
+
+Each request is a new PHP request, so a script that connects to its
+database opens a new connection for every request, as it does under
+PHP-FPM. A persistent connection stays with the thread from one request to
+the next:
+
+```php
+$pdo = new PDO($dsn, $user, $password, [PDO::ATTR_PERSISTENT => true]);
+```
+
+On a request that runs two MySQL queries this took the CPU time per request
+from 757 to 630 µs (about 20% more requests a second); PHP-FPM gains about
+as much. A persistent connection is one per thread, so the database sees
+up to `threads()` connections, and what a request leaves on it (an open
+transaction, a lock, session variables) is there for the next request on
+that thread: end transactions in the script.
 
 ## Threads
 
