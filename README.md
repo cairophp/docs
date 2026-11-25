@@ -51,6 +51,7 @@ repository.
 
 - [PHP command line: artisan, bin/console and Composer on the Cairo binary](cli.md)
 - [Isolated mode](isolated-mode.md)
+- [Classic mode: WordPress and other script apps](classic.md)
 - [Frameworks: PSR-15, Symfony and Laravel](frameworks.md)
 - [Compatibility: the apps and frameworks tested on Cairo](compatibility.md)
 - [Reloading the code: `--watch` and the reload signal](reload.md)

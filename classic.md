@@ -1,0 +1,106 @@
+# Classic mode: WordPress and other script apps
+
+Apps that are a set of PHP scripts (WordPress, Drupal, phpMyAdmin, a folder of
+`.php` files) expect what PHP-FPM gives them: a fresh PHP request for every
+HTTP request, in which they load their files, define their functions and
+constants and keep their state in globals. Classic mode gives them that:
+
+```php
+<?php // server.php
+
+$app = (new Cairo\App())
+    ->concurrency('classic')
+    ->threads(8);
+
+$app->http(':8080')->scripts(__DIR__ . '/wordpress');
+
+return $app;
+```
+
+```sh
+cairo serve server.php
+```
+
+`scripts($dir)` does what nginx's `try_files` and `fastcgi_split_path_info`
+do in front of PHP-FPM:
+
+| Request | What answers it |
+|---|---|
+| `/wp-login.php` | the script `wp-login.php` |
+| `/index.php/some/path` | `index.php`, with `PATH_INFO` = `/some/path` |
+| `/wp-admin/` | `wp-admin/index.php` |
+| `/wp-admin` | a 301 to `/wp-admin/` |
+| `/wp-content/themes/x/style.css` | the file, served by Go (as `publicDir()`) |
+| `/2026/11/hello-world/`, any other path | the front controller `index.php` (WordPress' pretty links) |
+| `/.env`, `/.git/config`, any hidden path | the front controller: hidden files are never served |
+
+Without an `index.php` at the root, a path that names no script and no file
+is a 404. A PHP file is never sent as a file, and every lookup stays inside
+the directory, symlinks included.
+
+## What a script gets
+
+As under PHP-FPM:
+
+- `$_GET`, `$_POST`, `$_FILES`, `$_COOKIE`, `$_REQUEST` and `$_SERVER`, with
+  `SCRIPT_FILENAME`, `SCRIPT_NAME`, `PHP_SELF`, `PATH_INFO`, `DOCUMENT_ROOT`,
+  `SERVER_PORT`, `HTTP_HOST` and the request's headers; `php://input` is the
+  request's body.
+- The script runs in the global scope, in its own directory, with
+  `auto_prepend_file` and `auto_append_file`. `exit()` ends the script, and
+  the functions it registered with `register_shutdown_function()` run before
+  the request is answered.
+- What it echoes, its `header()`, `setcookie()` and `http_response_code()` are
+  the answer. `flush()` sends what was echoed so far, and
+  `fastcgi_finish_request()` works ([Streamed answers](streaming.md)).
+- PHP's own sessions (`session_start()`), one per request.
+- A fatal error ends that request only: the client gets a 500 and the thread
+  takes the next request in a fresh PHP request.
+
+Inside a request, Cairo's concurrency API still works: `Cairo\async()` runs a
+function in a fiber of the request, and its waits (PDO, curl, `sleep()`,
+streams) overlap ([Concurrency API](concurrency.md)).
+
+## Threads
+
+A PHP thread runs one request at a time, as a PHP-FPM worker does, so
+`threads()` is the number of requests served at once: size it as you would
+`pm.max_children`. Requests that arrive while every thread is busy wait in
+Go, in one first-in, first-out queue. Turn on opcache (it is on in the
+official image): each request loads the app's files again, as under PHP-FPM.
+
+Each request starts a PHP request on the same system thread, which keeps its
+PHP resources: starting a new thread for each request would cost about four
+times the request itself.
+
+## WordPress
+
+WordPress 6.8 installs and runs in classic mode: the installer, the home
+page, posts, comments, search and feeds, logging in, the dashboard and its
+settings, pretty permalinks, the REST API, media uploads and wp-cron. Put
+`server.php` next to the `wordpress` directory, as above, and set
+`DB_HOST` in `wp-config.php` to your database. Set `WP_HOME` and
+`WP_SITEURL` if WordPress runs behind a proxy.
+
+Its home page and a post, on the same machine (2 cores for the server, 4 PHP
+workers each, the same `php.ini` with opcache, 16 connections, 5 alternating
+rounds of 8 s):
+
+| | Cairo classic | FrankenPHP (`php_server`) | nginx + PHP-FPM |
+|---|---|---|---|
+| home page | 65.4 req/s | 67.0 | 72.5 |
+| a post | 54.8 req/s | 57.6 | 61.1 |
+
+PHP-FPM runs a PHP built without thread safety (NTS), which a threaded server
+such as Cairo or FrankenPHP cannot use; that is likely part of its lead, but
+it was not measured apart.
+
+## Classic, isolated or fibers
+
+- **Classic**: every request is a new PHP request. For script apps. The
+  slowest of the three, as PHP-FPM is, because every request loads the app.
+- **[Isolated](isolated-mode.md)**: a PHP thread boots the app once and runs
+  its requests one after another. For apps with a front controller that keep
+  state in globals (Laravel through Octane, Symfony).
+- **Fibers** (the default): a thread runs many requests at once. For apps
+  whose code keeps no request state in statics and globals.
