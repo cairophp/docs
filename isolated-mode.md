@@ -1,5 +1,8 @@
 # Isolated mode
 
+Apps that are a set of scripts, such as WordPress, need a fresh PHP request
+for every request instead: see [Classic mode](classic.md).
+
 Apps that keep request state in globals or singletons (many Laravel and
 Symfony apps, most legacy code) can run with one request per PHP thread at a
 time:
