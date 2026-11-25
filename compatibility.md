@@ -13,16 +13,12 @@ named, with the Cairo of that date.
 | Laravel through Octane (cairophp/laravel-octane) | Laravel 13.43 | `php artisan octane:start --server=cairo` | isolated and fibers | The driver's 16 tests: requests, workers, `octane:reload`, `--watch`, `--max-requests`, stop | By hand, against each Cairo change to the driver |
 | Slim | 4.15 with slim/psr7 1.8 | `$http->fallback($slimApp)` | fibers | Route parameters, a JSON body, the query string, 404, 20 requests of 0.5 s on one thread at once | By hand, 2026-11-24 |
 | Mezzio | 3.29 with laminas-diactoros 3.10, FastRoute | `$http->fallback($mezzioApp)` | fibers | Route parameters, a raw body, the query string, 404, 20 requests of 0.5 s on one thread at once | By hand, 2026-11-24 |
+| WordPress | 6.8.3, MariaDB | [classic mode](classic.md), `$http->scripts()` | classic | The installer, home page, posts, comments, search, feed, logging in, the dashboard and its settings, pretty permalinks, the REST API (creating and listing posts), a media upload, wp-cron, the plugins page; `wp-config.php` is never sent | By hand, 2026-11-25 |
+| Scripts of their own (`examples/classic`) | | classic mode, `$http->scripts()` | classic | Fresh state for each request, routing (scripts, `PATH_INFO`, directories, the front controller, hidden files), forms, `php://input`, cookies, sessions, `exit()` and shutdown functions, a fatal error, fibers inside a request | In CI |
 | Any PSR-15 handler (`examples/frameworks`) | nyholm/psr7 | `$http->fallback($handler)` | fibers | Requests, multipart uploads, attributes, streamed bodies | In CI |
 
 ## What does not run yet
 
-- **WordPress, Drupal and other apps that are a set of PHP scripts.** A Cairo
-  PHP thread is one PHP request for its whole life, and these apps define
-  their functions and load their files once per PHP request: the second
-  request of a thread finds them loaded, or fails with "Cannot redeclare".
-  Serve them with PHP-FPM or FrankenPHP for now. A classic mode, a fresh PHP
-  request for every request, is in the works.
 - **Laravel without Octane.** `$http->fallback($laravel->make(Kernel::class))`
   answers requests, but nothing resets the app between them: the logged-in
   user, singletons and changed config of one request are there for the next.
@@ -34,9 +30,10 @@ named, with the Cairo of that date.
 
 ## Not tested yet
 
-API Platform, CakePHP, CodeIgniter, Laminas MVC, Yii and Spiral have not been
-run on Cairo. API Platform and Symfony apps in general are served the same way
-as the Symfony demo; the PSR-15 frameworks the same way as Slim and Mezzio.
+API Platform, CakePHP, CodeIgniter, Laminas MVC, Yii, Spiral, Drupal and
+phpMyAdmin have not been run on Cairo. API Platform and Symfony apps in general are served the same way
+as the Symfony demo; the PSR-15 frameworks the same way as Slim and Mezzio; Drupal and other script
+apps the same way as WordPress, in classic mode.
 If you run one of them, a report of what worked and what did not is welcome as
 an issue in cairophp/cairo.
 
