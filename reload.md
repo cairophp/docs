@@ -45,7 +45,10 @@ cairo serve server.php --watch
 cairo serve server.php --watch-path src --watch-path config --watch-path .env
 ```
 
-`--watch` looks at the directory of the server file and everything under it.
+`--watch` looks at the directory of the server file and everything under it,
+or at the directory above it when that one has the `composer.json` and the
+server file's does not: a front controller such as Symfony's `public/index.php`
+is served from a directory below the app's code.
 `--watch-path` names the directories and files to look at instead, and can be
 repeated; the server file itself is always watched.
 
