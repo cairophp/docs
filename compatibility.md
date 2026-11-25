@@ -7,8 +7,8 @@ named, with the Cairo of that date.
 
 | App or framework | Version | How it is served | Mode | Checked | Where |
 |---|---|---|---|---|---|
-| Symfony demo app (symfony/symfony-demo) | 3.1, Symfony 8.1, Doctrine ORM 3.6, Twig 3.27 | `cairo serve public/index.php` | isolated | Home page, blog list and post pages, 404 page, logging in through the form, the admin area with the session | By hand, 2026-11-24 |
-| Symfony, a kernel of its own (`examples/symfony`) | Symfony 7.4 (CI resolves the newest for its PHP) | `cairo serve public/index.php` | isolated and fibers | Routes, the document root, forms, 404, one kernel per request in flight (20 requests of 0.5 s on one thread), recycled threads, `--watch` | In CI |
+| Symfony demo app (symfony/symfony-demo) | 3.1, Symfony 8.1, Doctrine ORM 3.6, Twig 3.27 | `cairo serve public/index.php` with cairophp/symfony-runtime | isolated | Home page, blog list and post pages, 404 page, logging in through the form, the admin area with the session | By hand, 2026-11-24 |
+| Symfony, a kernel of its own (the package's `tests/fixture`) | Symfony 7.4 or 8 (Composer resolves the newest for its PHP) | `cairo serve public/index.php` with cairophp/symfony-runtime | isolated and fibers | Routes, the document root, forms, 404, one kernel per request in flight (20 requests of 0.5 s on one thread), recycled threads, sessions refused in fiber mode | The package's tests, against each Cairo change it depends on |
 | Symfony kernel given to `server.php` (`examples/frameworks`) | Symfony HttpFoundation 6.4 or 7 | `$http->fallback($kernel)` | fibers | Requests, uploads, cookies, streamed and file responses | In CI |
 | Laravel through Octane (cairophp/laravel-octane) | Laravel 13.43 | `php artisan octane:start --server=cairo` | isolated and fibers | The driver's 16 tests: requests, workers, `octane:reload`, `--watch`, `--max-requests`, stop | By hand, against each Cairo change to the driver |
 | Slim | 4.15 with slim/psr7 1.8 | `$http->fallback($slimApp)` | fibers | Route parameters, a JSON body, the query string, 404, 20 requests of 0.5 s on one thread at once | By hand, 2026-11-24 |
@@ -28,8 +28,8 @@ named, with the Cairo of that date.
   user, singletons and changed config of one request are there for the next.
   Use the Octane driver.
 - **Symfony in fiber mode with sessions.** PHP has one session per thread,
-  and the requests in flight on a thread would share it. Cairo's Symfony
-  runtime refuses to start an app with `framework.session` in fiber mode;
+  and the requests in flight on a thread would share it. cairophp/symfony-runtime
+  refuses to start an app with `framework.session` in fiber mode;
   serve it in isolated mode, the default.
 
 ## Not tested yet

@@ -32,20 +32,39 @@ installed. Which apps were tested, and how: [Compatibility](compatibility.md).
 
 ## Symfony, through its front controller
 
-A Symfony app needs no `server.php`. Serve its own front controller:
+A Symfony app needs no `server.php`. Install the runtime package, as for
+FrankenPHP's `runtime/frankenphp-symfony`:
+
+```sh
+composer require cairophp/symfony-runtime
+```
+
+name its runtime class in `composer.json` (then `composer dump-autoload`), or
+in `APP_RUNTIME` in the environment:
+
+```json
+"extra": {
+    "runtime": {
+        "class": "Cairo\\Symfony\\Runtime"
+    }
+}
+```
+
+and serve the app's own front controller:
 
 ```sh
 cairo serve public/index.php
 ```
 
 Symfony's `public/index.php` hands the app to its Runtime component
-(`vendor/autoload_runtime.php`), which picks a runtime class from
-`APP_RUNTIME`. Under `cairo serve` that is `Cairo\Symfony\Runtime`, which is
-in the binary: there is nothing to install and nothing to set. It builds the
-HTTP server for the kernel, with `public/` as the [document
-root](#the-document-root), and serves it on every PHP thread. `.env` files are
-read as Symfony reads them, and `bin/console` runs as before, with Symfony's own
-runtime (`cairo php bin/console`).
+(`vendor/autoload_runtime.php`), which makes the runtime class it was given.
+Under `cairo serve`, `Cairo\Symfony\Runtime` builds the HTTP server for the
+kernel, with `public/` as the [document root](#the-document-root), and serves
+it on every PHP thread; anywhere else (`bin/console`, PHP-FPM, tests) it is
+Symfony's own runtime, so nothing else changes. `.env` files are read as
+Symfony reads them. The package is
+[cairophp/symfony-runtime](https://github.com/cairophp/symfony-runtime); it
+needs a Cairo newer than 0.5.0 (with `App::serve()`).
 
 The runtime takes options from `APP_RUNTIME_OPTIONS` (JSON) or from
 `extra.runtime` in `composer.json`, as Symfony's own runtimes do:
@@ -64,6 +83,7 @@ APP_RUNTIME_OPTIONS='{"listen":":80","threads":16}' cairo serve public/index.php
 ```json
 "extra": {
     "runtime": {
+        "class": "Cairo\\Symfony\\Runtime",
         "listen": ":8080",
         "concurrency": "fibers"
     }
@@ -90,7 +110,11 @@ the app's directory is the one above `public/`.
 
 For more than these options (gRPC servers, metrics, middleware), write a
 `server.php` and give it the kernel: `$http->fallback($kernel)`, as above.
-`examples/symfony` is a Symfony app served this way.
+
+A framework's runner of your own can do what the package does: build a
+`Cairo\\App` in the file that `cairo serve` runs and call `$app->serve()`,
+which serves until the thread is told to stop and then returns, instead of
+returning the App (`examples/serve`).
 
 ## The document root
 
