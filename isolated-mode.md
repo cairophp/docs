@@ -21,7 +21,8 @@ In isolated mode Cairo fills `$_GET`, `$_POST` (url-encoded and multipart
 forms), `$_FILES`, `$_COOKIE`, `$_SERVER` and `$_REQUEST`; `$_SERVER` also
 keeps what the app put there as its thread started (Symfony's runtime and
 Dotenv put the app's settings there), under the request's own keys; the
-process's environment is in `getenv()` and `$_ENV`; a handler that returns nothing answers with what it
+process's environment is in `getenv()` and `$_ENV` (a `putenv()` stays on its
+thread, which reads it with `getenv()`: see [Classic mode](classic.md)); a handler that returns nothing answers with what it
 echoed, its `header()` calls and `http_response_code()`. `flush()` sends what
 was echoed so far, and `headers_send(103)` and `fastcgi_finish_request()`
 work as under other PHP servers: see [Streamed answers](streaming.md). After each request it

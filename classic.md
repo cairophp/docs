@@ -54,6 +54,12 @@ As under PHP-FPM:
   the answer. `flush()` sends what was echoed so far, and
   `fastcgi_finish_request()` works ([Streamed answers](streaming.md)).
 - PHP's own sessions (`session_start()`), one per request.
+- `putenv()` changes the request's own environment, which `getenv()` reads
+  first: no other request sees it, on its thread or another. The process's
+  environment is only read: PHP's `putenv()` would write it while other
+  threads read it, which crashes the process (Laravel's `.env` loader calls
+  it on every request). C libraries that read the environment themselves
+  (libpq, curl's proxy settings) do not see a `putenv()`.
 - A fatal error ends that request only: the client gets a 500 and the thread
   takes the next request in a fresh PHP request.
 
