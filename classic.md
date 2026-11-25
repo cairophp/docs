@@ -59,9 +59,12 @@ As under PHP-FPM:
 
 The script runs on its thread's own stack, not in a fiber, as it does under
 PHP-FPM: its own waits (PDO, curl, `sleep()`, streams) hold the thread, as
-they would hold a PHP-FPM worker, and the request's deadline
-(`Middleware::timeout()`) stops a script that computes, but cannot cut such a
-wait short. Cairo's concurrency API still works there: `Cairo\async()` runs a
+they would hold a PHP-FPM worker. The request's deadline
+(`Middleware::timeout()`) still stops the script: one that computes, and one
+that waits on a socket (PDO MySQL, streams) or in `sleep()`, which then throws
+`Cairo\Context\DeadlineExceeded`, so a stuck query does not keep its thread
+from the requests behind it. A wait inside curl or PDO PostgreSQL in the
+script itself is not cut short. Cairo's concurrency API still works there: `Cairo\async()` runs a
 function in a fiber of the request, whose waits overlap, and `await()`,
 channels, `select()`, `offload()` and `Cairo\sleep()` let those fibers run
 while the script waits ([Concurrency API](concurrency.md)).
