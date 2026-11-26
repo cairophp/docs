@@ -15,14 +15,14 @@ the AGPL-3.0 and not, like Cairo, under Apache-2.0;
 source.
 
 The script picks the binary for your machine and checks it against the
-release's `SHA256SUMS` before it installs anything. `CAIRO_VERSION=v0.5.0`
+release's `SHA256SUMS` before it installs anything. `CAIRO_VERSION=v0.6.0`
 picks a release and `CAIRO_INSTALL_DIR` another directory. To do the same by
 hand, download from the
 [releases page](https://github.com/cairophp/cairo/releases):
 
 ```sh
-curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.5.0/cairo-linux-amd64
-curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.5.0/SHA256SUMS
+curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.6.0/cairo-linux-amd64
+curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.6.0/SHA256SUMS
 sha256sum --check --ignore-missing SHA256SUMS
 install -m 755 cairo-linux-amd64 /usr/local/bin/cairo
 ```
@@ -30,7 +30,7 @@ install -m 755 cairo-linux-amd64 /usr/local/bin/cairo
 In a container, use the official image ([Docker](docker.md)):
 
 ```dockerfile
-FROM ghcr.io/cairophp/cairo:0.5
+FROM ghcr.io/cairophp/cairo:0.6
 COPY --chown=cairo:cairo . /app
 ```
 
