@@ -144,6 +144,16 @@ has with the file on disk, whatever `opcache.validate_timestamps` says in
 `php.ini`. Files are read once per thread, so this costs nothing per
 request.
 
+This works with `opcache.validate_timestamps=0` too, as production setups
+often have it. opcache records no time for a file it compiles with that
+setting, so it could not tell an old file from a new one later. Where
+`php.ini` turns it off, each PHP thread turns it on with an
+`opcache.revalidate_freq` of ten years, once, as it starts: opcache records
+the time of each file as it compiles it, which it reads anyway, and never
+looks at the disk again until a reload. Without a reload, the cache behaves
+as `php.ini` says, and no request pays for it. `ini_get()` shows the two
+values the threads run with; `get_cfg_var()` still shows `php.ini`'s.
+
 The new code goes into the cache beside the old, which the old threads still
 run, and the old code stays there as stale memory. When the cache is full,
 opcache has to empty it, which is only safe in a new process: a reload that
