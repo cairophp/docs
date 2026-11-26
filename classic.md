@@ -73,21 +73,32 @@ Cairo's concurrency API (`Cairo\async()`, `await()`, `select()`,
 `Cairo\sleep()`, `offload()`, `Cairo\Pool`) works in such a script as in a
 declared one, and the rest of Cairo's runtime loads only when a script uses it.
 
+Each request is then PHP's own request, as under PHP-FPM: Cairo sets PHP's
+request information and PHP itself reads the cookies, parses the forms and
+the uploads, and runs the script, with no Cairo PHP code around it. A plain
+folder is served as fast as PHP-FPM behind nginx. Two things differ from a
+declared app, and are PHP-FPM's way: PHP turns `.` and spaces in the names
+of cookies into `_` (`a.b` is `$_COOKIE['a_b']`), and an output of more than
+1 MiB, or one that `flush()` sent, goes to the client while the script
+waits on its thread, as a PHP-FPM worker does.
+
 ## What a script gets
 
 As under PHP-FPM:
 
 - `$_GET`, `$_POST`, `$_FILES`, `$_COOKIE`, `$_REQUEST` and `$_SERVER`, with
   `SCRIPT_FILENAME`, `SCRIPT_NAME`, `PHP_SELF`, `PATH_INFO`, `DOCUMENT_ROOT`,
-  `SERVER_PORT`, `HTTP_HOST` and the request's headers; `php://input` is the
-  request's body.
+  `SERVER_PORT`, `HTTP_HOST` and the request's headers, and `PHP_AUTH_USER`
+  and `PHP_AUTH_PW` (or `PHP_AUTH_DIGEST`) from an `Authorization` header;
+  `php://input` is the request's body.
 - The script runs in the global scope, in its own directory, with
   `auto_prepend_file` and `auto_append_file`. `exit()` ends the script, and
   the functions it registered with `register_shutdown_function()` run before
   the request is answered.
 - What it echoes, its `header()`, `setcookie()` and `http_response_code()` are
   the answer. `flush()` sends what was echoed so far, and
-  `fastcgi_finish_request()` works ([Streamed answers](streaming.md)).
+  `fastcgi_finish_request()` and `headers_send(103)` (Early Hints) work
+  ([Streamed answers](streaming.md)).
 - PHP's own sessions (`session_start()`), one per request.
 - The environment functions work as under PHP-FPM. The request's CGI
   variables (`REQUEST_METHOD`, `REMOTE_ADDR`, `HTTP_HOST` and the other
