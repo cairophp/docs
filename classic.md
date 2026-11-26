@@ -38,6 +38,36 @@ Without an `index.php` at the root, a path that names no script and no file
 is a 404. A PHP file is never sent as a file, and every lookup stays inside
 the directory, symlinks included.
 
+## Every request is PHP's own
+
+When every route of the app is `scripts()`, as above, each request runs
+only its script, as under PHP-FPM, and every request behaves the same. Cairo
+sets PHP's request information and PHP itself reads the cookies, parses the
+forms and the uploads, and runs the script, with no Cairo PHP code around it.
+server.php runs once on each thread, when the thread starts, to make the
+declaration, and never before a request: what it sets in PHP (`ini_set()`, a
+constant, a function, a file it requires) does not reach the scripts. A
+setting that every script needs goes in php.ini, or in a file that php.ini's
+`auto_prepend_file` names. What it declares for Go still applies to every
+request: middleware, the deadline, cached routes, `sendfile()`.
+
+A declared app and a folder with no declaration are then served alike, as
+fast as PHP-FPM behind nginx: on a page that runs two MySQL queries, 4,997
+and 5,013 requests a second (16 threads, the same machine).
+
+Cairo's concurrency API (`Cairo\async()`, `await()`, `select()`,
+`Cairo\sleep()`, `offload()`, `Cairo\Pool`) works in a script as in a
+handler, and the rest of Cairo's runtime loads only when a script uses it.
+
+Two things are PHP-FPM's way: PHP turns `.` and spaces in the names of
+cookies into `_` (`a.b` is `$_COOKIE['a_b']`), and an output of more than
+1 MiB, or one that `flush()` sent, goes to the client while the script waits
+on its thread, as a PHP-FPM worker does.
+
+An app that declares other routes beside `scripts()` runs server.php again
+before each request, and its scripts see what server.php set; their cookies
+keep their names as sent.
+
 ## Serving with no declaration
 
 A folder, or a PHP file that declares no `Cairo\App`, needs no server.php:
@@ -65,22 +95,9 @@ PHP-FPM, but in wall time (PHP-FPM counts CPU time on Linux), and
 `set_time_limit()` does not change it. With neither, a request has no
 deadline.
 
-Nothing of the app runs before a request: each request runs only its script,
-so every request behaves the same, as under PHP-FPM. A setting that every
-script needs goes in php.ini, or in a file that php.ini's `auto_prepend_file`
-names. Apart from the deadline, there is no Go middleware without a declaration.
-Cairo's concurrency API (`Cairo\async()`, `await()`, `select()`,
-`Cairo\sleep()`, `offload()`, `Cairo\Pool`) works in such a script as in a
-declared one, and the rest of Cairo's runtime loads only when a script uses it.
-
-Each request is then PHP's own request, as under PHP-FPM: Cairo sets PHP's
-request information and PHP itself reads the cookies, parses the forms and
-the uploads, and runs the script, with no Cairo PHP code around it. A plain
-folder is served as fast as PHP-FPM behind nginx. Two things differ from a
-declared app, and are PHP-FPM's way: PHP turns `.` and spaces in the names
-of cookies into `_` (`a.b` is `$_COOKIE['a_b']`), and an output of more than
-1 MiB, or one that `flush()` sent, goes to the client while the script
-waits on its thread, as a PHP-FPM worker does.
+Apart from the deadline, there is no Go middleware without a declaration.
+A folder or a plain file is served as a declared app of `scripts()` alone is
+(below).
 
 ## What a script gets
 
