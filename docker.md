@@ -31,6 +31,9 @@ With PHP 8.3 the server [cannot see opcache's restart
 coming](supervision.md#when-opcache-has-to-restart) and the threads of a
 [reload](reload.md) do not use opcache: prefer 8.4 or newer.
 
+An app that needs more extensions builds on the native image instead, which
+is Cairo on the official `php` image: [Adding PHP extensions](extensions.md).
+
 ## An image for your app
 
 ```dockerfile

@@ -75,9 +75,10 @@ the stubs package ([IDE and static analysis](ide.md)).
   extension, libmysqlclient builds) block the whole thread;
   `App::detectBlocking()` finds them.
 - **Extensions.** The release binary has a fixed set of extensions
-  ([Building](building.md)) and cannot load others (`dl()` is off). phpredis,
-  imagick, mongodb and other PECL extensions are not included; build Cairo
-  yourself to add them, as long as they are thread-safe under ZTS. `pcntl`
+  ([Building](building.md)) and cannot load others (`dl()` is off). For
+  phpredis, imagick, mongodb and other PECL extensions, use the native image
+  or build a static binary with them ([Adding PHP extensions](extensions.md));
+  they must be thread-safe. `pcntl`
   is there for the scripts of `cairo php` only, without `pcntl_fork()`
   ([signals](cli.md#signals)).
 - **One process.** Cairo runs one process with many PHP threads; it does not
