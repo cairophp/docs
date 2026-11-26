@@ -18,6 +18,9 @@ image, in `/usr/share/licenses/cairo`.
 Before 1.0 a minor version may change the PHP API ([Stability](stability.md)),
 so build on `0.5`, not on `latest`.
 
+An app that needs more extensions builds on the native image instead, which
+is Cairo on the official `php` image: [Adding PHP extensions](extensions.md).
+
 ## An image for your app
 
 ```dockerfile

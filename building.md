@@ -53,6 +53,8 @@ extension; code is then compiled once per thread, when `server.php` and the
 classes it loads are first used. CI builds it and runs the end-to-end tests
 against it.
 `scripts/build-static.sh` does the work and also runs outside Docker on Alpine.
+The binary cannot load extensions at run time, but a build can add more
+([a static binary with more extensions](extensions.md#a-static-binary-with-more-extensions)).
 Both builds link in the [Mercure hub](mercure.md), which is AGPL-3.0;
 `make build TAGS=nomercure` and `--build-arg CAIRO_TAGS=nomercure`
 [leave it out](mercure.md#a-binary-without-the-hub).

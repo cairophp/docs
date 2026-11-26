@@ -15,6 +15,7 @@ repository.
 
 - [Install, supported platforms and known limitations](install.md)
 - [Docker: the official image](docker.md)
+- [Adding PHP extensions: the native image and static builds](extensions.md)
 - [How it works](how-it-works.md)
 - [Stability: what a release may change](stability.md)
 
