@@ -65,8 +65,8 @@ app takes to start, after the requests in flight. To make it rare:
   many times between restarts needs more room.
 
 This needs PHP 8.4 or newer, where opcache tells Cairo of the restart. The
-released binary and the image have PHP 8.5. A Cairo that you build against
-PHP 8.1 to 8.3 cannot see the restart coming: there it ends the process with
+default binary and image have PHP 8.6. Cairo with PHP 8.1 to 8.3 (the `php8.3`
+binary and image, or a build of your own) cannot see the restart coming: there it ends the process with
 `zend_mm_heap corrupted`, so the three points above are what keeps it away.
 
 ## Stopping the server

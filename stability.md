@@ -48,8 +48,11 @@ Not covered, and free to change in any release:
 - There is no release calendar. A release is cut when a set of changes is
   ready, and every release passes the full test suite on amd64 and arm64,
   against MariaDB and PostgreSQL, before its binaries are published.
-- The release binary and the official image carry the newest PHP that Cairo
-  supports (8.5 today). A build of your own works with PHP 8.1 or newer.
+- Each release has a binary and an image for every PHP that Cairo supports
+  (8.3, 8.4, 8.5 and 8.6 today), and the default ones carry the newest. A new
+  PHP joins in the release after it is out, and becomes the default; a PHP
+  leaves once PHP itself stops its security fixes. A build of your own works
+  with PHP 8.1 or newer.
 - Every performance claim comes with numbers that you can rerun:
   [cairophp/benchmarks](https://github.com/cairophp/benchmarks) has the suite
   and the log of every change with its measured effect.
