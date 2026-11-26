@@ -64,7 +64,7 @@ it on every PHP thread; anywhere else (`bin/console`, PHP-FPM, tests) it is
 Symfony's own runtime, so nothing else changes. `.env` files are read as
 Symfony reads them. The package is
 [cairophp/symfony-runtime](https://github.com/cairophp/symfony-runtime); it
-needs a Cairo newer than 0.5.0 (with `App::serve()`).
+needs Cairo 0.6 or later (with `App::serve()`).
 
 The runtime takes options from `APP_RUNTIME_OPTIONS` (JSON) or from
 `extra.runtime` in `composer.json`, as Symfony's own runtimes do:
