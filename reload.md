@@ -162,8 +162,9 @@ so in the log. Give opcache room (`opcache.memory_consumption`,
 `opcache.max_accelerated_files`) for a few generations of the code you
 deploy between restarts.
 
-All of this is so with PHP 8.4 or newer, which the released binary and the
-image have. A Cairo that you build against PHP 8.1 to 8.3 cannot see opcache's
+All of this is so with PHP 8.4 or newer, which the default binary and image
+have. Cairo with PHP 8.1 to 8.3 (the `php8.3` binary and image, or a build of
+your own) cannot see opcache's
 restart coming, so there the threads that start after the first reload do
 not use opcache: each compiles the app for itself, which costs memory and
 start time per thread, and nothing per request.

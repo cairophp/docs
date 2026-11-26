@@ -1,9 +1,11 @@
 # Docker
 
 The official image is `ghcr.io/cairophp/cairo`, for amd64 and arm64. It is
-the release's static binary on Alpine, and nothing else: PHP 8.5, opcache and
+the release's static binary on Alpine, and nothing else: PHP, opcache and
 the extensions are inside the binary
-([what the release binary has](building.md)).
+([what the release binary has](building.md)). There is one image for each PHP
+that Cairo supports, 8.3, 8.4, 8.5 and 8.6, and the plain tags have the
+newest of them.
 
 The binary contains the [Mercure hub](mercure.md), which is licensed under
 the AGPL-3.0 and not, like Cairo, under Apache-2.0. The licenses are in the
@@ -11,12 +13,23 @@ image, in `/usr/share/licenses/cairo`.
 
 | Tag | What it follows |
 |---|---|
-| `0.5.0` | That release, never moved |
-| `0.5` | The newest `0.5.x` |
-| `latest` | The newest release |
+| `0.6.1` | That release with the newest PHP, never moved |
+| `0.6` | The newest `0.6.x` with the newest PHP |
+| `latest` | The newest release with the newest PHP |
+| `0.6.1-php8.4` | That release with PHP 8.4, never moved |
+| `0.6-php8.4` | The newest `0.6.x` with PHP 8.4 |
+| `php8.4` | The newest release with PHP 8.4 |
+
+The same goes for `php8.3`, `php8.5` and `php8.6`. Releases up to 0.6.0 have
+one image, with PHP 8.5, under the plain tags only.
 
 Before 1.0 a minor version may change the PHP API ([Stability](stability.md)),
-so build on `0.5`, not on `latest`.
+so build on `0.6`, not on `latest`. The plain tags move to a new PHP when
+Cairo adds one: to keep your PHP too, build on `0.6-php8.6`.
+
+With PHP 8.3 the server [cannot see opcache's restart
+coming](supervision.md#when-opcache-has-to-restart) and the threads of a
+[reload](reload.md) do not use opcache: prefer 8.4 or newer.
 
 An app that needs more extensions builds on the native image instead, which
 is Cairo on the official `php` image: [Adding PHP extensions](extensions.md).
@@ -24,7 +37,7 @@ is Cairo on the official `php` image: [Adding PHP extensions](extensions.md).
 ## An image for your app
 
 ```dockerfile
-FROM ghcr.io/cairophp/cairo:0.5
+FROM ghcr.io/cairophp/cairo:0.6
 COPY --chown=cairo:cairo . /app
 ```
 
@@ -37,7 +50,7 @@ The image's working directory is `/app` and it runs `cairo serve server.php`
 there. Make `server.php` listen on all interfaces (`$app->http(':8080')`), not
 on `127.0.0.1`, or the published port reaches nothing. To serve another file
 or pass flags, give the command: `docker run my-app serve app/server.php
---threads 4`. `docker run ghcr.io/cairophp/cairo:0.5 version` prints the
+--threads 4`. `docker run ghcr.io/cairophp/cairo:0.6 version` prints the
 version.
 
 The process runs as the user `cairo` (uid 1000), not as root. Copy your files
@@ -63,7 +76,7 @@ script, so it runs on the image as well, with the extensions the app will
 have:
 
 ```dockerfile
-FROM ghcr.io/cairophp/cairo:0.5
+FROM ghcr.io/cairophp/cairo:0.6
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY --chown=cairo:cairo . /app
 RUN php /usr/local/bin/composer install --no-dev --prefer-dist
@@ -80,7 +93,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --prefer-dist
 
-FROM ghcr.io/cairophp/cairo:0.5
+FROM ghcr.io/cairophp/cairo:0.6
 COPY --chown=cairo:cairo . /app
 COPY --from=vendor --chown=cairo:cairo /app/vendor /app/vendor
 ```
@@ -108,7 +121,7 @@ the server file that the command would start, with its settings in the
 environment:
 
 ```dockerfile
-FROM ghcr.io/cairophp/cairo:0.5
+FROM ghcr.io/cairophp/cairo:0.6
 COPY --chown=cairo:cairo . /app
 ENV LARAVEL_OCTANE=1 \
     APP_BASE_PATH=/app \
@@ -136,7 +149,7 @@ Cairo runs on Linux only ([supported platforms](install.md#supported-platforms))
 On macOS and Windows, develop in Docker with your project mounted:
 
 ```sh
-docker run --rm -it -p 8080:8080 -v "$PWD":/app ghcr.io/cairophp/cairo:0.5
+docker run --rm -it -p 8080:8080 -v "$PWD":/app ghcr.io/cairophp/cairo:0.6
 ```
 
 Docker Desktop runs the arm64 image on Apple silicon and the amd64 image on

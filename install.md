@@ -1,7 +1,8 @@
 # Install
 
-Cairo ships as one static binary for Linux on amd64 and arm64, with PHP 8.5,
-opcache and the extensions built in. Nothing else is needed at run time, not even
+Cairo ships as one static binary for Linux on amd64 and arm64, with PHP,
+opcache and the extensions built in. There is one binary for each PHP that
+Cairo supports, 8.3, 8.4, 8.5 and 8.6, and the default has the newest. Nothing else is needed at run time, not even
 libc. This installs the latest release into `/usr/local/bin`:
 
 ```sh
@@ -15,8 +16,17 @@ the AGPL-3.0 and not, like Cairo, under Apache-2.0;
 source.
 
 The script picks the binary for your machine and checks it against the
-release's `SHA256SUMS` before it installs anything. `CAIRO_VERSION=v0.6.0`
-picks a release and `CAIRO_INSTALL_DIR` another directory. To do the same by
+release's `SHA256SUMS` before it installs anything. `CAIRO_PHP=8.4` picks
+the binary with PHP 8.4, `CAIRO_VERSION=v0.6.0` a release and
+`CAIRO_INSTALL_DIR` another directory:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/cairophp/cairo/main/install.sh | CAIRO_PHP=8.4 bash
+```
+
+The binaries are named for their PHP, `cairo-php8.4-linux-amd64`, and the
+newest PHP's is also `cairo-linux-amd64`. Releases up to 0.6.0 have one
+binary, with PHP 8.5, under the plain name only. To do the same by
 hand, download from the
 [releases page](https://github.com/cairophp/cairo/releases):
 
@@ -45,8 +55,11 @@ the stubs package ([IDE and static analysis](ide.md)).
 - Linux on amd64 and arm64. macOS and Windows are not supported, since Cairo
   relies on a thread-safe PHP embedded in a Go process; use the
   [official image](docker.md#macos-and-windows) in Docker there.
-- PHP 8.1 or newer when you build Cairo yourself; the release binary has
-  PHP 8.5.
+- PHP 8.3, 8.4, 8.5 or 8.6 in the release binaries and images (8.6 by
+  default), and PHP 8.1 or newer when you build Cairo yourself. With PHP 8.3
+  the server [cannot see opcache's restart coming](supervision.md#when-opcache-has-to-restart)
+  and the threads of a [reload](reload.md) do not use opcache: prefer 8.4 or
+  newer.
 - PostgreSQL (`pdo_pgsql`, through pgx) and MySQL or MariaDB (PDO MySQL and
   mysqli through hooked streams).
 

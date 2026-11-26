@@ -46,12 +46,13 @@ make static         # docker build -f Dockerfile.static --output dist .
 
 `dist/cairo` holds Cairo, PHP and every extension above, linked against musl
 with no shared libraries, so it runs on any Linux of the same CPU
-architecture, including `FROM scratch` images. It uses PHP 8.5 with opcache
-built in; pass `--build-arg PHP_VERSION=8.4.14` for another PHP. Before PHP 8.5
-it has no opcache, since older PHP can only build opcache as a shared
-extension; code is then compiled once per thread, when `server.php` and the
-classes it loads are first used. CI builds it and runs the end-to-end tests
-against it.
+architecture, including `FROM scratch` images. It uses PHP 8.6 with opcache
+built in; pass `--build-arg PHP_VERSION=8.4.28` for another PHP, 8.3 or newer.
+Before PHP 8.5 opcache can only be built as a shared extension, which a
+static binary cannot load, so the build patches PHP to build it in, with
+[static-php-cli](https://github.com/crazywhalecc/static-php-cli)'s patches,
+and leaves its JIT out. CI builds it with each PHP that the releases ship and
+runs the end-to-end tests against each.
 `scripts/build-static.sh` does the work and also runs outside Docker on Alpine.
 The binary cannot load extensions at run time, but a build can add more
 ([a static binary with more extensions](extensions.md#a-static-binary-with-more-extensions)).
