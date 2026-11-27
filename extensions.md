@@ -33,7 +33,7 @@ image's, so an extension goes in the way the `php` image documents:
 ```dockerfile
 FROM ghcr.io/cairophp/cairo:0.7-php8.5-trixie
 USER root
-RUN docker-php-ext-install pdo_pgsql intl \
+RUN docker-php-ext-install pdo_mysql intl \
     && pecl install redis \
     && docker-php-ext-enable redis
 USER cairo
@@ -60,8 +60,8 @@ is the argument that the image's `cairo` takes.
 
 The `php` image has fewer extensions than the release binary. It has
 opcache (Cairo loads it), curl, openssl, sodium and PDO with SQLite, but not
-mbstring, intl, gd, zip, bcmath, pcntl, mysqli or the PDO drivers for MySQL
-and PostgreSQL until you add them. `cairo php -m` lists what yours has.
+mbstring, intl, gd, zip, bcmath, pcntl, mysqli or PDO MySQL until you add
+them; Cairo's native image adds `pdo_pgsql`. `cairo php -m` lists what yours has.
 
 ## The glibc binary
 

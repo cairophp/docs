@@ -12,8 +12,8 @@ cairo php -r 'echo PHP_VERSION, "\n";'
 ```
 
 It is the PHP inside the binary, with the same version, extensions and
-settings as the server: what a command can use, a request can. PostgreSQL
-goes through [Cairo's own PDO driver](postgresql.md) here too.
+settings as the server: what a command can use, a request can. PostgreSQL's
+waits suspend only their fiber here too ([PostgreSQL](postgresql.md)).
 
 ## What a script gets
 
