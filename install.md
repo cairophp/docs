@@ -17,7 +17,7 @@ source.
 
 The script picks the binary for your machine and checks it against the
 release's `SHA256SUMS` before it installs anything. `CAIRO_PHP=8.4` picks
-the binary with PHP 8.4, `CAIRO_VERSION=v0.6.0` a release and
+the binary with PHP 8.4, `CAIRO_VERSION=v0.7.0` a release and
 `CAIRO_INSTALL_DIR` another directory:
 
 ```sh
@@ -33,8 +33,8 @@ hand, download from the
 [releases page](https://github.com/cairophp/cairo/releases):
 
 ```sh
-curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.6.0/cairo-linux-amd64
-curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.6.0/SHA256SUMS
+curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.7.0/cairo-linux-amd64
+curl -fsSLO https://github.com/cairophp/cairo/releases/download/v0.7.0/SHA256SUMS
 sha256sum --check --ignore-missing SHA256SUMS
 install -m 755 cairo-linux-amd64 /usr/local/bin/cairo
 ```
@@ -42,7 +42,7 @@ install -m 755 cairo-linux-amd64 /usr/local/bin/cairo
 In a container, use the official image ([Docker](docker.md)):
 
 ```dockerfile
-FROM ghcr.io/cairophp/cairo:0.6
+FROM ghcr.io/cairophp/cairo:0.7
 COPY --chown=cairo:cairo . /app
 ```
 
