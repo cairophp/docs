@@ -9,7 +9,7 @@ $app->slowRequests(0.5);   // log requests that take longer than 0.5 s
 ```
 
 ```
-level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest_run_ms=12 sql="38 in 310ms" http="2 in 890ms"
+level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest_run_ms=12 socket="38 in 310ms" http="2 in 890ms"
 ```
 
 - `route` is the route's method and pattern (never the raw path), or the
@@ -22,9 +22,8 @@ level=WARN msg="slow request" route="GET /orders/{id}" ms=1240 php_ms=40 longest
   pausing. Every other request on its thread waited for that long. A
   high value means CPU work that belongs in `offload()`, or a blocking call.
 - Each kind of wait that happened is listed with its count and total time:
-  - `sql`: PDO pgsql.
   - `http`: curl.
-  - `socket`: other hooked sockets, such as PDO MySQL, Redis and streams.
+  - `socket`: hooked sockets, such as PDO pgsql, PDO MySQL, Redis and streams.
   - `connect`: DNS, connect and TLS handshakes.
   - `sleep`.
   - `wait`: channels, `select()`, and `Cairo\Pool` with `acquireTimeout`.

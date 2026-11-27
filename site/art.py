@@ -39,7 +39,7 @@ CARDS = [
     ("branch", "async, await, channels", "Run I/O in parallel with <code>async()</code>, pass values with channels, wait on several with <code>select()</code>.", "concurrency", "Concurrency API"),
     ("clock", "Deadlines that reach I/O", "Every request carries a context. Timeouts and cancellation stop the query or call that is waiting.", "context", "Context and deadlines"),
     ("cpu", "Offload pool", "<code>Cairo\\offload()</code> runs CPU-heavy work on its own threads and hands the result back to the fiber.", "concurrency", "Offload"),
-    ("db", "PostgreSQL and MySQL", "<code>pdo_pgsql</code> backed by Go's pgx, PDO MySQL and mysqli through hooked sockets.", "postgresql", "Databases"),
+    ("db", "PostgreSQL and MySQL", "PHP's <code>pdo_pgsql</code> on libpq, PDO MySQL and mysqli, each wait on the fiber.", "postgresql", "Databases"),
     ("layers", "Connection pools", "<code>Cairo\\Pool</code> shares connections between fibers, with wait timeouts, resets and lifetimes.", "pools", "Pools"),
     ("zap", "Response cache", "Go answers repeated GETs from memory without running PHP, with stale-while-revalidate and tags.", "response-cache", "Response cache"),
     ("shield", "Isolated mode", "Code that needs <code>$_GET</code>, <code>echo</code> or singletons gets one request per thread and a clean state after.", "isolated-mode", "Isolated mode"),
@@ -153,7 +153,7 @@ def diagram() -> str:
 <g font-family="JetBrains Mono, monospace" font-size="12">
 <rect x="36" y="90" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="112" fill="#EEF0F8">:8080  HTTP</text>
 <rect x="36" y="134" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="156" fill="#EEF0F8">:9000  gRPC</text>
-<rect x="36" y="178" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="200" fill="#EEF0F8">pgx · DNS · TLS</text>
+<rect x="36" y="178" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="200" fill="#EEF0F8">libpq · DNS · TLS</text>
 </g>
 <text x="36" y="246" fill="#6D7491" font-size="11">waits for PHP, never blocks it</text>
 <path d="M216 112 C 250 112, 250 70, 284 70" fill="none" stroke="#F7BE55" stroke-width="1.6" stroke-dasharray="4 4"/>

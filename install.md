@@ -62,7 +62,7 @@ the stubs package ([IDE and static analysis](ide.md)).
   the server [cannot see opcache's restart coming](supervision.md#when-opcache-has-to-restart)
   and the threads of a [reload](reload.md) do not use opcache: prefer 8.4 or
   newer.
-- PostgreSQL (`pdo_pgsql`, through pgx) and MySQL or MariaDB (PDO MySQL and
+- PostgreSQL (PHP's `pdo_pgsql`, on libpq) and MySQL or MariaDB (PDO MySQL and
   mysqli through hooked streams).
 
 ## Known limitations
