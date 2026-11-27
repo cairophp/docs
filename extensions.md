@@ -1,19 +1,20 @@
 # Adding PHP extensions
 
-The release binary has a fixed set of extensions ([Building](building.md)).
-It cannot load more at run time: it is a static program, and a static
-program on musl has no `dlopen()`. There are two ways to give an app the
-extensions it needs, each with PHP's own tools:
+The default release binary has a fixed set of extensions
+([Building](building.md)). It cannot load more at run time: it is a static
+program, and a static program on musl has no `dlopen()`. There are three
+ways to give an app the extensions it needs, each with PHP's own tools:
 
-| | The native image | A static binary of your own |
-|---|---|---|
-| What it is | Cairo built against the official `php` image's own PHP | The static binary with more extensions built in |
-| How you add one | `docker-php-ext-install`, `pecl install` or `install-php-extensions` in your Dockerfile, as for any `php` image | Build arguments, then one build |
-| Base | Debian (trixie), glibc | none: one file, `FROM scratch` works |
-| Extensions | Shared (`.so`), loaded at start like PHP's | Linked in |
+| | The native image | The glibc binary | A static binary of your own |
+|---|---|---|---|
+| What it is | Cairo built against the official `php` image's own PHP | The release binary, linked against glibc, which loads extensions | The static binary with more extensions built in |
+| How you add one | `docker-php-ext-install`, `pecl install` or `install-php-extensions` in your Dockerfile, as for any `php` image | `phpize`, `./configure`, `make install` with its kit | Build arguments, then one build |
+| Runs on | Docker (Debian trixie) | Any Linux with glibc 2.36 or newer | Any Linux, `FROM scratch` too |
+| Extensions | Shared (`.so`), loaded at start like PHP's | Shared (`.so`), loaded at start like PHP's | Linked in |
 
-Pick the native image when the app needs extensions and runs in a container.
-Pick a static binary of your own when it must be one file.
+Pick the native image when the app needs extensions and runs in a
+container. Pick the glibc binary on a server or VM, or in an image of your
+own. Pick a static binary of your own when it must be one file with no libc.
 
 Whichever you use, an extension must build for the PHP version (a PECL
 release says which it supports) and be thread-safe: Cairo runs PHP in
@@ -61,6 +62,51 @@ The `php` image has fewer extensions than the release binary. It has
 opcache (Cairo loads it), curl, openssl, sodium and PDO with SQLite, but not
 mbstring, intl, gd, zip, bcmath, pcntl, mysqli or the PDO drivers for MySQL
 and PostgreSQL until you add them. `cairo php -m` lists what yours has.
+
+## The glibc binary
+
+Each release has, next to the static binaries, one for glibc of each PHP
+and architecture: `cairo-php8.5-linux-amd64-gnu` and so on, and
+`cairo-linux-amd64-gnu` with the newest PHP. It has the same PHP and the same
+extensions as the static binary, and it is static too except for glibc, which
+it uses from the system: that is what lets it load an extension. It needs
+glibc 2.36 or newer (Debian 12, Ubuntu 24.04, RHEL 10 and the distributions
+of their time), and runs on any of them.
+
+An extension must be built for exactly that PHP, so the release has a kit
+next to each glibc binary, `cairo-php8.5-linux-amd64-gnu-dev.tar.gz`: that
+PHP's headers, `php-config` and `phpize`, unpacked in `/opt/cairo/php8.5`.
+`install.sh` installs both:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/cairophp/cairo/main/install.sh | CAIRO_LIBC=gnu CAIRO_PHP=8.5 bash
+```
+
+Then build the extension from its sources, as for any PHP, with the kit's
+`phpize` and `php-config` (the build needs a C compiler and autoconf):
+
+```sh
+curl -fsSL https://pecl.php.net/get/redis | tar -xz && cd redis-*/
+/opt/cairo/php8.5/bin/phpize
+./configure --with-php-config=/opt/cairo/php8.5/bin/php-config
+make && sudo make install       # into /opt/cairo/php8.5/lib/php/extensions/...
+cairo php -d extension=redis -m | grep redis
+```
+
+`make install` puts the `.so` in the kit's extension directory, where
+`extension=redis` finds it by name; an absolute path works from anywhere.
+To load it everywhere, in servers and in `cairo php`, put `extension=redis`
+in `/opt/cairo/php8.5/lib/php.ini`, the php.ini the binary reads when none
+is named. Another one goes with `--php-ini` or `CAIRO_PHP_INI`
+([PHP settings](building.md)). The binary never reads the system PHP's
+php.ini.
+
+A library that the extension links (imagick's ImageMagick, for example) is
+the system's, as for any extension. One that the binary has inside it too,
+such as OpenSSL or libxml2, is the binary's for the extension as well: an
+extension built against another major version of it may fail. CI builds
+the glibc binary of each PHP and architecture, builds shmop with its kit,
+and loads it in `cairo php` and in a server.
 
 ## A static binary with more extensions
 
