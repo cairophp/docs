@@ -26,7 +26,9 @@ curl -fsSL https://raw.githubusercontent.com/cairophp/cairo/main/install.sh | CA
 
 The binaries are named for their PHP, `cairo-php8.4-linux-amd64`, and the
 newest PHP's is also `cairo-linux-amd64`. Releases up to 0.6.0 have one
-binary, with PHP 8.5, under the plain name only. To do the same by
+binary, with PHP 8.5, under the plain name only. `CAIRO_LIBC=gnu` installs
+the glibc binary instead, which loads extensions, with the kit to build them
+([the glibc binary](extensions.md#the-glibc-binary)). To do the same by
 hand, download from the
 [releases page](https://github.com/cairophp/cairo/releases):
 
@@ -74,11 +76,11 @@ the stubs package ([IDE and static analysis](ide.md)).
   extensions that open their own sockets (the MongoDB driver, gRPC's C
   extension, libmysqlclient builds) block the whole thread;
   `App::detectBlocking()` finds them.
-- **Extensions.** The release binary has a fixed set of extensions
+- **Extensions.** The default release binary has a fixed set of extensions
   ([Building](building.md)) and cannot load others (`dl()` is off). For
-  phpredis, imagick, mongodb and other PECL extensions, use the native image
-  or build a static binary with them ([Adding PHP extensions](extensions.md));
-  they must be thread-safe. `pcntl`
+  phpredis, imagick, mongodb and other PECL extensions, use the glibc binary
+  or the native image, which load them, or build a static binary with them
+  ([Adding PHP extensions](extensions.md)); they must be thread-safe. `pcntl`
   is there for the scripts of `cairo php` only, without `pcntl_fork()`
   ([signals](cli.md#signals)).
 - **One process.** Cairo runs one process with many PHP threads; it does not

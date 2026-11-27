@@ -56,6 +56,9 @@ runs the end-to-end tests against each.
 `scripts/build-static.sh` does the work and also runs outside Docker on Alpine.
 The binary cannot load extensions at run time, but a build can add more
 ([a static binary with more extensions](extensions.md#a-static-binary-with-more-extensions)).
+`docker build -f Dockerfile.gnu --output dist .` builds the same binary on
+Debian 12 with glibc left shared, which loads extensions, and the kit to
+build them, `dist/cairo-dev.tar.gz` ([the glibc binary](extensions.md#the-glibc-binary)).
 Both builds link in the [Mercure hub](mercure.md), which is AGPL-3.0;
 `make build TAGS=nomercure` and `--build-arg CAIRO_TAGS=nomercure`
 [leave it out](mercure.md#a-binary-without-the-hub).
