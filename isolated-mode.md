@@ -29,10 +29,32 @@ work as under other PHP servers: see [Streamed answers](streaming.md). After eac
 clears the superglobals and calls `reset()` on everything given to
 `resetAfterRequest()` (any object with a `reset()` method, such as
 `Cairo\Resettable` or Symfony's `ResetInterface`, or a callable). Requests that
-arrive while every thread is busy wait in Go, in one first-in, first-out
-queue, and go to the next thread that is free, so a slow request never holds
-up the ones behind it while another thread is idle. Use more threads in this
-mode.
+arrive while every thread is busy wait in one first-in, first-out queue, and
+go to the next thread that is free, so a slow request never holds up the ones
+behind it while another thread is idle.
+
+## How many threads
+
+A thread runs one request at a time, so `threads()` (or Octane's
+`--workers`) is how many requests run at once. Threads that wait for a
+database or an HTTP call use no CPU, so an app whose requests mostly wait
+wants many of them. An app whose requests mostly compute (a framework's own
+work counts) does not: under load a thread that answers takes the next
+request at once, every thread stays runnable, and the system shares the CPUs
+among them in turns. A request paused halfway then waits for the other
+threads' turns, so the slowest requests get slower while the typical one
+does not.
+
+Laravel's hello through Octane on 2 CPUs, under load:
+
+| Threads | Requests/s | p50 | p99 |
+|---------|------------|-----|-----|
+| 8 | 2,025 | 28 ms | 53 ms |
+| 40 | 2,004 | 23 ms | 132 ms |
+
+Start with about 4 threads per CPU, raise it while requests wait more than
+they compute, and watch the p99 (the [metrics](observability.md) histogram has it) as
+you do.
 
 Uploads are parsed by Go into temporary files that are removed after the
 request. `move_uploaded_file()` and `is_uploaded_file()` accept them in both
