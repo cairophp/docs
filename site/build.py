@@ -23,10 +23,15 @@ from pygments.util import ClassNotFound
 
 import art
 import hero
+import ill
+import scenes_core
+import scenes_ext
+import scenes_modes
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
-RELEASE = "v0.5.0"
+RELEASE = "v0.8.1"
+SCENES = {sc.id: sc for sc in scenes_modes.SCENES + scenes_core.SCENES + scenes_ext.SCENES}
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;650;700;800'
@@ -125,6 +130,10 @@ def build_docs(docs: Path, logo: str) -> str:
         src_name = "README.md" if pid == "overview" else f"{pid}.md"
         text = readme if pid == "overview" else fix_source(pid, (docs / src_name).read_text())
         body = render(text, pid)
+        plain = re.sub(r"</(p|li|h\d|pre|td|th|tr|ul|ol)>|<br\s*/?>|\n", " ", body)
+        plain = re.sub(r'<a class="anchor"[^>]*>#</a>|<button[^>]*>.*?</button>|<span class="lang">.*?</span>|<[^>]+>', "", plain)
+        index.append({"id": pid, "title": title, "text": " ".join(html.unescape(plain).split())})
+        body = ill.expand(body, SCENES, pid)
         pager = '<nav class="pager" aria-label="Pages">'
         if i > 0:
             pager += f'<a class="prev" href="#{order[i - 1][0]}"><small>← Previous</small>{html.escape(order[i - 1][1])}</a>'
@@ -133,9 +142,6 @@ def build_docs(docs: Path, logo: str) -> str:
         pager += "</nav>"
         sections.append(f'<article class="page" data-id="{pid}" data-src="{src_name}" data-title="{html.escape(title)}">'
                         f'<p class="crumb">{html.escape(group)}</p>{body}{pager}</article>')
-        plain = re.sub(r"</(p|li|h\d|pre|td|th|tr|ul|ol)>|<br\s*/?>|\n", " ", body)
-        plain = re.sub(r'<a class="anchor"[^>]*>#</a>|<button[^>]*>.*?</button>|<span class="lang">.*?</span>|<[^>]+>', "", plain)
-        index.append({"id": pid, "title": title, "text": " ".join(html.unescape(plain).split())})
 
     nav = []
     for gi, (group, items) in enumerate(groups):
@@ -298,7 +304,7 @@ def build_landing(logo: str) -> str:
     lg = logo_svg(logo)
     out = (SRC / "landing.html").read_text()
     parts = {
-        "LOGO": lg, "LOGO_BIG": lg, "SCENE": hero.scene(), "DIAGRAM": art.diagram(), "CARDS": art.cards_html(),
+        "LOGO": lg, "LOGO_BIG": lg, "SCENE": hero.scene(), "CARDS": art.cards_html(), "RELEASE": RELEASE,
         "ICON_GITHUB": art.icon("github"), "ICON_ARROW": art.icon("arrow"), "ICON_BOLT": art.icon("bolt"),
         "INSTALL_BIN": panel(INSTALL_BIN, "sh"), "INSTALL_DOCKER": panel(INSTALL_DOCKER, "dockerfile"),
         "INSTALL_OCTANE": panel(INSTALL_OCTANE, "sh"),
@@ -307,6 +313,8 @@ def build_landing(logo: str) -> str:
         "CODE_OCTANE": panel(CODE_OCTANE, "sh"),
         "BENCH_HEAD": head, "BENCH_ROWS": rows, "BARS": bars,
     }
+    for sid in ("journey", "mode-fibers", "mode-isolated", "mode-classic", "mode-plain", "mode-cli"):
+        parts["ILL_" + sid.upper().replace("-", "_")] = ill.render(SCENES[sid])
     for k, v in parts.items():
         out = out.replace("{{%s}}" % k, v)
     return out + LANDING_JS
@@ -404,8 +412,11 @@ def main():
     landing = build_landing(logo)
     docs_body = build_docs(docs, logo)
     logos = build_logos()
-    landing_css = (SRC / "landing.css").read_text()
-    docs_css = (SRC / "docs.css").read_text()
+    ill_css, ill_js = (SRC / "ill.css").read_text(), f'<script>{(SRC / "ill.js").read_text()}</script>'
+    landing += ill_js
+    docs_body += ill_js
+    landing_css = (SRC / "landing.css").read_text() + ill_css
+    docs_css = (SRC / "docs.css").read_text() + ill_css
     ldesc = "Cairo is a PHP application server in one Go binary: HTTP and gRPC declared in PHP, every request in its own fiber."
     end = "</body>\n</html>\n"
     for name, fragment in (("pages", False), ("artifact", True)):

@@ -78,6 +78,8 @@ control as it does with any reader that is slow. `recv()` waits only when
 none has arrived, so a handler that reads many messages does not pay a wait
 for each.
 
+<!-- illustration: grpc-stream -->
+
 Health checking (`grpc.health.v1`) and server reflection are built in, so
 `grpcurl -plaintext localhost:9000 list` works.
 

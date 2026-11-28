@@ -32,6 +32,8 @@ $http->get('/orders', function () {
 - Register in `server.php`, before the server starts. Every PHP thread runs
   it, so every thread registers its own.
 
+<!-- illustration: request-local -->
+
 Statics nobody registered stay shared. A package that keeps request state in
 one must have it registered, or it must run in [isolated mode](isolated-mode.md).
 

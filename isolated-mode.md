@@ -34,6 +34,8 @@ arrive while every thread is busy wait in one first-in, first-out queue, and
 go to the next thread that is free, so a slow request never holds up the ones
 behind it while another thread is idle.
 
+<!-- illustration: mode-isolated -->
+
 ## How many threads
 
 A thread runs one request at a time, so `threads()` (or Octane's

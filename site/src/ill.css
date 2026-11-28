@@ -1,0 +1,110 @@
+/* Illustrations (site/ill.py, src/ill.js): one ink card in both themes, code on the left and the picture on the right once there is room. */
+.ill { --ill-bg: #141A47; --ill-stage: #0D1135; --ill-line: rgba(200, 208, 255, 0.16); --ill-ink: #E8EAFB; --ill-muted: #9AA2D6; --ill-dim: #6E76AE;
+  --ill-gold: #FFC043; --ill-nile: #5FD9CC; --ill-violet: #B6C1FF; --ill-sun: #FF9F6A; --ill-red: #FF7A7A;
+  container-type: inline-size; position: relative; margin: 1.8rem 0 2rem; background: var(--ill-bg); color: var(--ill-ink); border: 2px solid #141A47; border-radius: 18px; overflow: hidden; font-size: 0.94rem; line-height: 1.5; }
+.ill code { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; }
+.ill-head { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; padding: 0.85rem 1.1rem 0.75rem; border-bottom: 1px solid var(--ill-line); }
+.ill-head b { font-weight: 700; font-size: 1rem; color: #fff; }
+.ill-kicker { font: 600 0.68rem "JetBrains Mono", ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ill-gold); }
+.ill-body { display: grid; grid-template-columns: minmax(0, 1fr); }
+.ill-code { min-width: 0; padding: 0.35rem 0 0.5rem; border-bottom: 1px solid var(--ill-line); max-height: 26rem; overflow-y: auto; }
+.ill-file + .ill-file { border-top: 1px dashed var(--ill-line); }
+.ill .ill-fname { margin: 0; padding: 0.5rem 1.1rem 0; font: 500 0.7rem "JetBrains Mono", ui-monospace, monospace; color: var(--ill-dim); }
+.ill .ill-code pre { margin: 0; padding: 0.4rem 0 0.4rem; background: transparent; border: 0; color: var(--ill-ink); font-size: 0.74rem; line-height: 1.75; overflow-x: auto; }
+.ill-code code { display: block; min-width: max-content; }
+.ill .ln { display: block; padding: 0 1.1rem 0 0.9rem; border-left: 3px solid transparent; transition: opacity 0.3s, background 0.3s, border-color 0.3s; }
+.ill-code.focus .ln { opacity: 0.42; }
+.ill-code.focus .ln.on { opacity: 1; background: rgba(255, 192, 67, 0.11); border-left-color: var(--ill-gold); }
+.ill-stage { position: relative; min-width: 0; background: var(--ill-stage); padding: 0.6rem 0.6rem 0.4rem; }
+.ill-svg { display: block; width: 100%; height: auto; font-family: "Figtree", "Inter", system-ui, sans-serif; }
+.ill-clock { position: absolute; right: 0.9rem; bottom: 0.55rem; font: 600 0.72rem "JetBrains Mono", ui-monospace, monospace; color: var(--ill-gold); background: rgba(255, 192, 67, 0.1); border: 1px solid rgba(255, 192, 67, 0.35); border-radius: 999px; padding: 0.1rem 0.55rem; }
+.ill .ill-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; margin: 0.35rem 0 0.1rem; padding: 0 0.4rem 0 0.3rem; font-size: 0.7rem; color: var(--ill-muted); }
+.ill .ill-legend li { display: inline-flex; align-items: center; gap: 0.35rem; margin: 0; }
+.ill-legend li::before { content: ""; display: grid; place-items: center; width: 1.25rem; height: 0.85rem; border-radius: 5px; background: var(--ill-gold); border: 1.5px solid var(--ill-gold); color: #141A47; font-size: 0.5rem; line-height: 1; }
+.ill-legend .lg-run::before { content: "▶"; box-shadow: 0 0 0 1.5px #fff; }
+.ill-legend .lg-wait::before { background: rgba(255, 192, 67, 0.15); border-style: dashed; }
+.ill-legend .lg-queued::before { content: "●"; opacity: 0.6; font-size: 0.4rem; }
+.ill-legend .lg-done::before { content: "✓"; background: rgba(255, 192, 67, 0.55); font-size: 0.6rem; font-weight: 700; }
+
+/* picture */
+.lane rect { fill: rgba(182, 193, 255, 0.05); stroke: rgba(182, 193, 255, 0.22); stroke-width: 1; transition: stroke 0.4s, fill 0.4s; }
+.lane .lbl { font: 700 9.5px "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--ill-violet); }
+.lane .sub { font-size: 9.5px; fill: var(--ill-dim); text-anchor: end; }
+.lane.k-go rect { fill: rgba(95, 217, 204, 0.06); stroke: rgba(95, 217, 204, 0.32); }
+.lane.k-go .lbl { fill: var(--ill-nile); }
+.lane.k-wait rect { fill: rgba(255, 192, 67, 0.04); stroke: rgba(255, 192, 67, 0.36); stroke-dasharray: 5 4; }
+.lane.k-wait .lbl { fill: var(--ill-gold); }
+.lane.k-off rect { fill: rgba(255, 159, 106, 0.05); stroke: rgba(255, 159, 106, 0.4); stroke-dasharray: 5 4; }
+.lane.k-off .lbl { fill: var(--ill-sun); }
+.lane.k-queue rect { fill: rgba(200, 208, 255, 0.03); stroke: rgba(200, 208, 255, 0.24); stroke-dasharray: 2 4; }
+.lane.k-queue .lbl { fill: var(--ill-muted); }
+.lane.lit rect { stroke: #fff; stroke-width: 1.6; fill: rgba(255, 255, 255, 0.08); }
+.tok { transition: transform 0.75s cubic-bezier(0.45, 0.05, 0.2, 1), opacity 0.45s; }
+.tok .body { fill: var(--h); stroke: var(--h); stroke-width: 1.5; transition: fill-opacity 0.35s, stroke 0.35s, stroke-width 0.35s; }
+.tok .halo { fill: none; stroke: var(--h); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.tok text { font-size: 12px; font-weight: 700; fill: #141A47; text-anchor: middle; dominant-baseline: middle; transition: fill 0.35s; }
+.tok.small text { font-size: 10.5px; }
+.tok .ic { display: none; fill: none; stroke: #141A47; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tok .i-run path, .tok .i-queued circle { fill: #141A47; stroke: none; }
+.tok.s-run .i-run, .tok.s-wait .i-wait, .tok.s-done .i-done, .tok.s-fail .i-fail, .tok.s-queued .i-queued { display: inline; }
+.tok.s-run .body { stroke: #fff; stroke-width: 2.2; }
+.tok.s-run .halo { animation: ill-halo 1.6s ease-out infinite; }
+.tok.s-wait .body { fill-opacity: 0.13; stroke-dasharray: 4 3; }
+.tok.s-wait text { fill: var(--h); }
+.tok.s-wait .ic { stroke: var(--h); }
+.tok.s-queued { opacity: 0.62; }
+.tok.s-done .body { fill-opacity: 0.55; }
+.tok.s-fail .body { fill: var(--ill-red); stroke: #fff; stroke-dasharray: 3 2; }
+.tok.s-hidden { opacity: 0; }
+.mark { opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+.mark.on { opacity: 1; }
+.mark rect { fill: rgba(255, 192, 67, 0.14); stroke: var(--ill-gold); stroke-width: 1; }
+.mark text { font-size: 10.5px; font-weight: 600; fill: var(--ill-gold); text-anchor: middle; dominant-baseline: middle; }
+.mark.t-nile rect { fill: rgba(95, 217, 204, 0.13); stroke: var(--ill-nile); } .mark.t-nile text { fill: var(--ill-nile); }
+.mark.t-sun rect { fill: rgba(255, 159, 106, 0.14); stroke: var(--ill-sun); } .mark.t-sun text { fill: var(--ill-sun); }
+.mark.t-red rect { fill: rgba(255, 122, 122, 0.15); stroke: var(--ill-red); } .mark.t-red text { fill: var(--ill-red); }
+.mark.t-muted rect { fill: rgba(200, 208, 255, 0.08); stroke: rgba(200, 208, 255, 0.4); } .mark.t-muted text { fill: var(--ill-muted); }
+@keyframes ill-halo { 0% { opacity: 0.7; transform: scale(1); } 100% { opacity: 0; transform: scale(1.25, 1.6); } }
+
+/* controls and caption */
+.ill-bar { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.4rem 0.9rem; align-items: start; padding: 0.8rem 1.1rem 0.95rem; border-top: 1px solid var(--ill-line); }
+.ill-btns { display: flex; gap: 0.3rem; grid-row: span 2; }
+.ill-btns button { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--ill-line); background: transparent; color: var(--ill-ink); cursor: pointer; padding: 0; }
+.ill-btns button:hover { border-color: var(--ill-gold); color: var(--ill-gold); }
+.ill-btns svg { width: 16px; height: 16px; fill: currentColor; }
+.ill .ill-play { background: var(--ill-gold); border-color: var(--ill-gold); color: #141A47; }
+.ill .ill-play:hover { color: #141A47; filter: brightness(1.08); }
+.ill-play .i-pause, .ill.playing .ill-play .i-play { display: none; }
+.ill.playing .ill-play .i-pause { display: block; }
+.ill .ill-say { margin: 0; min-height: 4.5em; color: var(--ill-ink); font-size: 0.9rem; text-wrap: pretty; }
+.ill-say code, .ill-text code { font-size: 0.85em; background: rgba(182, 193, 255, 0.12); color: #DCE1FF; padding: 0.08em 0.35em; border-radius: 5px; }
+.ill-n { display: inline-block; font: 600 0.72rem "JetBrains Mono", ui-monospace, monospace; color: var(--ill-gold); margin-right: 0.3rem; }
+.ill-dots { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.ill-dots button { width: 18px; height: 18px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
+.ill-dots button::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ill-line); transition: background 0.3s, transform 0.3s; }
+.ill-dots button.on::before { background: var(--ill-gold); transform: scale(1.3); }
+.ill-dots button:hover::before { background: var(--ill-muted); }
+.ill-prog { position: absolute; left: 0; right: 0; top: -1px; height: 2px; overflow: hidden; }
+.ill-prog i { display: block; height: 100%; width: 0; background: var(--ill-gold); }
+@keyframes ill-prog { from { width: 0; } to { width: 100%; } }
+.ill :focus-visible { outline: 2px solid var(--ill-gold); outline-offset: 2px; }
+.ill-text { border-top: 1px solid var(--ill-line); padding: 0.55rem 1.1rem; font-size: 0.86rem; color: var(--ill-muted); }
+.ill-text summary { cursor: pointer; font-size: 0.8rem; color: var(--ill-dim); }
+.ill .ill-text ol { margin: 0.5rem 0 0.3rem; padding-left: 1.3rem; }
+.ill .ill-text li { margin-bottom: 0.3rem; }
+.ill:not(.ready) .ill-btns, .ill:not(.ready) .ill-dots { display: none; }
+.ill.still .tok, .ill.still .mark, .ill.still .ln { transition: none; }
+.ill.still .tok.s-run .halo { animation: none; }
+
+@container (min-width: 700px) {
+  .ill-body { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); }
+  .ill-code { border-bottom: 0; border-right: 1px solid var(--ill-line); max-height: none; }
+  .ill-stage { padding: 0.9rem 0.8rem 0.5rem; display: flex; flex-direction: column; justify-content: center; }
+  .ill-bar { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .ill-btns { grid-row: auto; }
+  .ill .ill-say { min-height: 3em; }
+  .ill-dots { grid-column: 3; max-width: 11.5rem; justify-content: flex-end; padding-top: 0.4rem; }
+}
+@container (min-width: 900px) {
+  .ill .ill-code pre { font-size: 0.8rem; }
+}

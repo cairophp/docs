@@ -1,5 +1,7 @@
 # How it works
 
+<!-- illustration: journey -->
+
 1. **Declare.** `cairo serve server.php` runs the file once. `App`, `http()`,
    `get()`, `grpc()` and `service()` only record a description of the servers,
    which goes to Go.
@@ -14,19 +16,22 @@
    that fiber suspends.
    - **Waits that need nothing of Go stay on the PHP thread.** The thread
      keeps the timers of `Cairo\sleep()`, channels and `select()` itself, and
-     watches the sockets of PHP's own functions (streams, PDO MySQL, curl) in
-     an epoll of its own. No goroutine is involved, and a sleep or a
-     hand-over between two fibers costs about a microsecond.
-   - **What Cairo does in Go runs there for the length of the operation**: a
-     PostgreSQL query, the HTTP, gRPC and network clients, DNS, connects and
-     TLS. The operation gets a goroutine and the request's
-     `context.Context`, narrowed to the deadline of the context that asked,
+     watches the sockets of PHP's own functions (streams, PDO MySQL, curl,
+     PDO PostgreSQL's libpq) in an epoll of its own. No goroutine is
+     involved, and a sleep or a hand-over between two fibers costs about a
+     microsecond.
+   - **What Cairo does in Go runs there for the length of the operation**:
+     the gRPC client, `Cairo\Net`, DNS, connects and TLS. The operation gets
+     a goroutine and the request's `context.Context`, narrowed to the deadline of the context that asked,
      and its result wakes the fiber.
    - `Cairo\async()` starts a child fiber on the same thread, with a child
      context. Both are PHP alone: Go has no goroutine and no context for a
      fiber.
    - A thread with nothing to run sleeps, and Go wakes it when it queues a
      request or a result for it. Neither side calls the other for that.
+
+<!-- illustration: waits -->
+
 4. **CPU work.** `Cairo\offload('fn', ...$args)` runs a function on the offload
    pool, so a heavy computation never stalls the fibers on a request thread.
    Code cannot move between PHP threads, so pass a function name or
@@ -39,3 +44,5 @@
    A job that throws raises `Cairo\OffloadException` naming the original
    exception class. So does a result that cannot be serialized, and a job
    whose offload thread stopped while it ran.
+
+<!-- illustration: offload -->

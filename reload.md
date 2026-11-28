@@ -38,6 +38,8 @@ level=INFO msg="php code reloaded" because=/app/src/Home.php took=6ms
 A request that is in flight for long (a stream, a WebSocket) keeps its old
 thread, and its old code, until it ends.
 
+<!-- illustration: reload -->
+
 ## `--watch`
 
 ```sh

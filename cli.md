@@ -58,6 +58,8 @@ print_r(await(all($tasks)));   // the three queries run at the same time
 cairo php report.php
 ```
 
+<!-- illustration: mode-cli -->
+
 The script itself is a fiber, the first one, and each `async()` starts
 another on the same thread. `sleep()`, sockets, curl, PDO and the `Cairo\`
 clients suspend the fiber that waits and the others go on: 50 tasks that each

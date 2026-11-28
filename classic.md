@@ -59,6 +59,8 @@ Cairo's concurrency API (`Cairo\async()`, `await()`, `select()`,
 `Cairo\sleep()`, `offload()`, `Cairo\Pool`) works in a script as in a
 handler, and the rest of Cairo's runtime loads only when a script uses it.
 
+<!-- illustration: mode-classic -->
+
 Two things are PHP-FPM's way: PHP turns `.` and spaces in the names of
 cookies into `_` (`a.b` is `$_COOKIE['a_b']`), and an output of more than
 1 MiB, or one that `flush()` sent, goes to the client while the script waits
@@ -77,6 +79,8 @@ A folder, or a PHP file that declares no `Cairo\App`, needs no server.php:
 cairo serve wordpress/                       # a folder: the table above
 cairo serve public/index.php --listen :80    # a front controller: Laravel, Slim, your own
 ```
+
+<!-- illustration: mode-plain -->
 
 | You give | What answers |
 |---|---|
