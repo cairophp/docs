@@ -46,6 +46,17 @@ With three statics registered, a fiber switch between requests took about
 15 ns more (60 ns → 75 ns). Plain-text and PostgreSQL requests per second
 were unchanged with nothing registered.
 
+## The environment
+
+`putenv()` is request-local the same way, in fiber and isolated mode: each
+request starts from the environment `server.php` left (the process's, with
+what `server.php` set with `putenv()` while the thread booted), its own
+`putenv()` calls are seen by its `getenv()` only, and they are gone when it
+ends. A library that calls `putenv()` once, behind a static of its own,
+should do so while the app boots, not in its first request. `.env` loaders
+such as phpdotenv run while the app boots, so their values reach every
+request.
+
 ## Finding statics that hold request state
 
 A package that hides request state in a static you did not register leaks
