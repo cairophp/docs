@@ -130,5 +130,15 @@ $http->fallback($kernel);                // everything else
 Go serves the files; no PHP runs for them. Only GET and HEAD requests for
 regular files are served. PHP files (`index.php`) and hidden files and
 directories (`.env`, `.git/`) are never served as files: those paths go to the
-app. Paths cannot leave `$dir`, and symlinks that point outside it are not
-followed.
+app. The one hidden directory served is a top-level `.well-known`
+(`security.txt`, ACME challenges, app links). Paths cannot leave `$dir`, and
+symlinks that point outside it are not followed.
+
+`$http->static($prefix, $dir)` serves the files under `$dir` at `$prefix` by
+the same rules, and answers 404 for every other path under `$prefix`: no PHP
+file, no hidden file, nothing outside `$dir`, and no directory listing. A
+directory is served by its `index.html` when it has one.
+
+```php
+$http->static('/assets', __DIR__ . '/assets');   // /assets/app.js, /assets/docs/ (its index.html)
+```
