@@ -17,17 +17,19 @@
    - **Waits that need nothing of Go stay on the PHP thread.** The thread
      keeps the timers of `Cairo\sleep()`, channels and `select()` itself, and
      watches the sockets of PHP's own functions (streams, PDO MySQL, curl,
-     PDO PostgreSQL's libpq) in an epoll of its own. No goroutine is involved, and a sleep or a
-     hand-over between two fibers costs about a microsecond.
+     PDO PostgreSQL's libpq) in an epoll of its own. No goroutine is
+     involved, and a sleep or a hand-over between two fibers costs about a
+     microsecond.
    - **What Cairo does in Go runs there for the length of the operation**:
-     the gRPC client, `Cairo\Net`, DNS, connects and TLS. The operation gets a goroutine and the request's
-     `context.Context`, narrowed to the deadline of the context that asked,
+     the gRPC client, `Cairo\Net`, DNS, connects and TLS. The operation gets
+     a goroutine and the request's `context.Context`, narrowed to the deadline of the context that asked,
      and its result wakes the fiber.
    - `Cairo\async()` starts a child fiber on the same thread, with a child
      context. Both are PHP alone: Go has no goroutine and no context for a
      fiber.
    - A thread with nothing to run sleeps, and Go wakes it when it queues a
      request or a result for it. Neither side calls the other for that.
+
 <!-- illustration: waits -->
 
 4. **CPU work.** `Cairo\offload('fn', ...$args)` runs a function on the offload
