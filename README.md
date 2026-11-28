@@ -21,6 +21,7 @@ repository.
 
 ## Serving
 
+- [HTTP server limits: timeouts](http-server.md)
 - [HTTPS and HTTP/2](https.md)
 - [gRPC](grpc.md)
 - [Middleware](middleware.md)
