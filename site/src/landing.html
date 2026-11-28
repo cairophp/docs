@@ -16,7 +16,7 @@
     <div class="stage">
       <div class="scene" aria-hidden="true">{{SCENE}}</div>
       <div class="wrap hero-copy">
-        <a class="pill" href="https://github.com/cairophp/cairo/blob/main/CHANGELOG.md"><b>v0.5.0</b> PHP 8.5 · HTTP and gRPC · Apache-2.0</a>
+        <a class="pill" href="https://github.com/cairophp/cairo/blob/main/CHANGELOG.md"><b>{{RELEASE}}</b> PHP 8.3 to 8.6 · HTTP and gRPC · Apache-2.0</a>
         <h1>The PHP app server that <em>never waits</em>.</h1>
         <p class="lede">Declare HTTP and gRPC servers in PHP. Go does the serving, and every request runs in its own fiber, so one PHP thread holds thousands of requests while they wait on databases and APIs.</p>
         <div class="cta">
@@ -61,15 +61,37 @@
     <div class="wrap">
       <p class="eyebrow">How it works</p>
       <h2>Go holds the network. <em>PHP holds the logic.</em></h2>
-      <div class="how-grid">
-        <div class="diagram">{{DIAGRAM}}</div>
-        <ol class="steps">
-          <li><b>Declare.</b> <code>cairo serve server.php</code> runs your file once. <code>http()</code>, <code>get()</code>, <code>grpc()</code> and <code>service()</code> describe the servers for Go.</li>
-          <li><b>Serve.</b> Go opens the listeners, builds the router and compiles your <code>.proto</code> files without <code>protoc</code>.</li>
-          <li><b>One request, one fiber.</b> When a handler waits on a socket, a sleep or a query, only its fiber pauses. The thread runs the others.</li>
-          <li><b>Offload.</b> <code>Cairo\offload()</code> sends CPU-heavy work to its own threads, so a long loop never stalls a request thread.</li>
-        </ol>
+      <p class="sub">Press play, or step through: the code on the left, what Cairo does with it on the right.</p>
+      {{ILL_JOURNEY}}
+      <ol class="steps">
+        <li><b>Declare.</b> <code>cairo serve server.php</code> runs your file once. <code>http()</code>, <code>get()</code>, <code>grpc()</code> and <code>service()</code> describe the servers for Go.</li>
+        <li><b>Serve.</b> Go opens the listeners, builds the router and compiles your <code>.proto</code> files without <code>protoc</code>.</li>
+        <li><b>One request, one fiber.</b> When a handler waits on a socket, a sleep or a query, only its fiber pauses. The thread runs the others.</li>
+        <li><b>Offload.</b> <code>Cairo\offload()</code> sends CPU-heavy work to its own threads, so a long loop never stalls a request thread.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="modes" class="modes">
+    <div class="wrap">
+      <p class="eyebrow">Concurrency in every mode</p>
+      <h2>One API, <em>five ways to run</em>.</h2>
+      <p class="sub"><code>async()</code>, <code>await()</code>, channels, <code>select()</code>, deadlines and <code>offload()</code> work in all of them. What changes is how requests share a PHP thread.</p>
+      <div class="mode-tabs">
+        <div class="tabs" role="tablist" aria-label="Modes">
+          <button type="button" role="tab" id="t-m-fibers" aria-selected="true" aria-controls="p-m-fibers">Fibers</button>
+          <button type="button" role="tab" id="t-m-isolated" aria-selected="false" aria-controls="p-m-isolated">Isolated</button>
+          <button type="button" role="tab" id="t-m-classic" aria-selected="false" aria-controls="p-m-classic">Classic</button>
+          <button type="button" role="tab" id="t-m-plain" aria-selected="false" aria-controls="p-m-plain">No declaration</button>
+          <button type="button" role="tab" id="t-m-cli" aria-selected="false" aria-controls="p-m-cli">cairo php</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-m-fibers" aria-labelledby="t-m-fibers"><p class="mode-line"><b>The default.</b> Many requests per thread, a fiber each: a request that waits leaves the thread to the others.</p>{{ILL_MODE_FIBERS}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-m-isolated" aria-labelledby="t-m-isolated" hidden><p class="mode-line"><b>For Laravel through Octane, Symfony and apps with globals.</b> One request per thread, with superglobals and a clean state after each.</p>{{ILL_MODE_ISOLATED}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-m-classic" aria-labelledby="t-m-classic" hidden><p class="mode-line"><b>For WordPress and other script apps.</b> A fresh PHP request for every request, as under PHP-FPM.</p>{{ILL_MODE_CLASSIC}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-m-plain" aria-labelledby="t-m-plain" hidden><p class="mode-line"><b>No server.php at all.</b> <code>cairo serve public/</code> serves a folder the way nginx and PHP-FPM do.</p>{{ILL_MODE_PLAIN}}</div>
+        <div class="tabpanel" role="tabpanel" id="p-m-cli" aria-labelledby="t-m-cli" hidden><p class="mode-line"><b>Commands and workers.</b> The binary is PHP's command line too, and a script runs under the same scheduler.</p>{{ILL_MODE_CLI}}</div>
       </div>
+      <a class="link-arrow" href="docs.html#modes">Concurrency in each mode {{ICON_ARROW}}</a>
     </div>
   </section>
 

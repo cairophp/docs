@@ -188,6 +188,8 @@ speaks. Publishing does not wait, so a message that a handler sends
 itself with `send()` may reach its client before one that was published
 just before it.
 
+<!-- illustration: topics -->
+
 **Server-Sent Events that Go serves alone.** The handler says who may
 listen to what, and ends:
 

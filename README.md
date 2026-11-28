@@ -32,6 +32,7 @@ repository.
 
 ## Concurrency
 
+- [Concurrency in each mode](modes.md)
 - [Context and deadlines](context.md)
 - [Concurrency API](concurrency.md)
 - [Request state: Context values](context-values.md)
@@ -79,3 +80,10 @@ the lists above. To build the site yourself:
 pip install -r site/requirements.txt
 python3 site/build.py .        # writes site/out/pages/
 ```
+
+A line `<!-- illustration: name -->` in a page shows an animated illustration
+there on the site (GitHub shows nothing): the code on the left and what Cairo
+does with it on the right, one step at a time. The illustrations are data in
+`site/scenes_modes.py`, `site/scenes_core.py` and `site/scenes_ext.py`; the
+build fails when a page names one that does not exist, or a step names a code
+line that is not in its code.

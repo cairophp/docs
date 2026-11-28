@@ -41,3 +41,5 @@ never waits. `$ctx->done()` is a channel that closes when the context ends,
 for `select()`. `$ctx->value('request_id')` reads values that Go middleware
 attached to the request. Values your own code stores use `Context::set()` and
 `Context::get()`.
+
+<!-- illustration: context -->

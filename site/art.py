@@ -1,4 +1,4 @@
-"""Inline SVG for the Cairo site: icons, the hero scene and the request diagram."""
+"""Inline SVG for the Cairo site: icons and feature cards."""
 import random
 
 _ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{}</svg>'
@@ -44,7 +44,7 @@ CARDS = [
     ("zap", "Response cache", "Go answers repeated GETs from memory without running PHP, with stale-while-revalidate and tags.", "response-cache", "Response cache"),
     ("shield", "Isolated mode", "Code that needs <code>$_GET</code>, <code>echo</code> or singletons gets one request per thread and a clean state after.", "isolated-mode", "Isolated mode"),
     ("pulse", "Finds what blocks", "Logs for blocking calls, slow requests with where they waited, heavy routes and leaking statics.", "blocking", "Diagnostics"),
-    ("box", "One static binary", "PHP 8.5, opcache and the extensions linked in with musl, for amd64 and arm64. Runs <code>FROM scratch</code>.", "building", "Building"),
+    ("box", "One static binary", "PHP 8.3 to 8.6, opcache and the extensions linked in with musl, for amd64 and arm64. Runs <code>FROM scratch</code>.", "building", "Building"),
 ]
 
 
@@ -131,43 +131,3 @@ def scene() -> str:
 <g class="reqs">{reqs}</g>
 </svg>'''
 
-
-def diagram() -> str:
-    def thread(y, label, fibers):
-        pills = []
-        x = 300
-        for kind, text in fibers:
-            fill, ink, w = {"run": ("#F7BE55", "#1A1206", 74), "wait": ("rgba(97,216,203,.14)", "#7FE3D6", 74)}[kind]
-            stroke = ' stroke="#61D8CB" stroke-opacity=".45"' if kind == "wait" else ""
-            pills.append(f'<rect x="{x}" y="{y + 34}" width="{w}" height="24" rx="12" fill="{fill}"{stroke}/>'
-                         f'<text x="{x + w / 2}" y="{y + 50.5}" text-anchor="middle" fill="{ink}" font-size="11" font-weight="600">{text}</text>')
-            x += w + 8
-        return (f'<rect x="284" y="{y}" width="300" height="74" rx="14" fill="#10142A" stroke="rgba(220,226,255,.14)"/>'
-                f'<text x="300" y="{y + 22}" fill="#EEF0F8" font-size="13" font-weight="600">{label}</text>' + "".join(pills))
-    return f'''<svg viewBox="0 0 600 372" role="img" aria-labelledby="dg-t">
-<title id="dg-t">Go accepts requests and hands each to a fiber on a PHP thread; fibers that wait free the thread; CPU work goes to offload threads.</title>
-<g font-family="Figtree, Inter, system-ui, sans-serif">
-<rect x="16" y="20" width="200" height="248" rx="16" fill="rgba(97,216,203,.06)" stroke="rgba(97,216,203,.4)"/>
-<text x="36" y="50" fill="#7FE3D6" font-size="13" font-weight="700" letter-spacing="1.5">GO</text>
-<text x="36" y="72" fill="#9EA5BE" font-size="12">net/http and grpc-go</text>
-<g font-family="JetBrains Mono, monospace" font-size="12">
-<rect x="36" y="90" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="112" fill="#EEF0F8">:8080  HTTP</text>
-<rect x="36" y="134" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="156" fill="#EEF0F8">:9000  gRPC</text>
-<rect x="36" y="178" width="160" height="34" rx="9" fill="#0B0E1D" stroke="rgba(220,226,255,.12)"/><text x="50" y="200" fill="#EEF0F8">libpq · DNS · TLS</text>
-</g>
-<text x="36" y="246" fill="#6D7491" font-size="11">waits for PHP, never blocks it</text>
-<path d="M216 112 C 250 112, 250 70, 284 70" fill="none" stroke="#F7BE55" stroke-width="1.6" stroke-dasharray="4 4"/>
-<path d="M216 156 C 250 156, 250 170, 284 170" fill="none" stroke="#F7BE55" stroke-width="1.6" stroke-dasharray="4 4"/>
-<circle cx="284" cy="70" r="3" fill="#F7BE55"/><circle cx="284" cy="170" r="3" fill="#F7BE55"/>
-{thread(30, "PHP thread 1", [("run", "running"), ("wait", "MySQL"), ("wait", "curl")])}
-{thread(130, "PHP thread 2", [("wait", "sleep"), ("run", "running"), ("wait", "gRPC")])}
-<rect x="284" y="248" width="300" height="56" rx="14" fill="#10142A" stroke="rgba(240,127,58,.45)" stroke-dasharray="5 4"/>
-<text x="300" y="271" fill="#F7BE55" font-size="13" font-weight="600">Offload threads</text>
-<text x="300" y="290" fill="#9EA5BE" font-size="11.5">CPU work, results back to the fiber</text>
-<path d="M434 204 L434 248" stroke="#F07F3A" stroke-width="1.6" stroke-dasharray="4 4"/>
-<g font-size="11" fill="#9EA5BE">
-<rect x="16" y="326" width="12" height="12" rx="6" fill="#F7BE55"/><text x="34" y="336">runs on the thread</text>
-<rect x="160" y="326" width="12" height="12" rx="6" fill="rgba(97,216,203,.14)" stroke="#61D8CB" stroke-opacity=".45"/><text x="178" y="336">paused, waiting on I/O</text>
-</g>
-</g>
-</svg>'''

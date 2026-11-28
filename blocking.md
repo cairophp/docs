@@ -25,3 +25,5 @@ from where it began. The check costs a timer tick in Go and nothing in PHP
 until it fires. Isolated mode, which runs one request per thread, does not
 report. `examples/blocking` has a loop, a long `password_hash()` and four
 routes that yield.
+
+<!-- illustration: blocking -->

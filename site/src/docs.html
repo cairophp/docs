@@ -61,6 +61,7 @@
     });
     document.title = page === 'overview' ? 'Cairo Docs' : el.dataset.title + ' · Cairo Docs';
     edit.href = 'https://github.com/cairophp/docs/blob/main/' + el.dataset.src;
+    root.classList.toggle('has-ill', !!el.querySelector('.ill'));
     heads = Array.prototype.slice.call(el.querySelectorAll('h2, h3'));
     toc.innerHTML = heads.map(function (h) {
       return '<li><a class="' + h.tagName.toLowerCase().replace('h', 'l') + '" href="#' + h.id + '">' + esc(h.firstChild.textContent) + '</a></li>';

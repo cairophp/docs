@@ -22,6 +22,8 @@ $http->get('/products', $listProducts)
 - Each server keeps at most 64 MiB of responses (least recently used go
   first), and a response over 1 MiB is not stored.
 
+<!-- illustration: response-cache -->
+
 Go middleware still runs on a cached request; values it passes to PHP (such
 as the request id) are those of the request that built the response.
 
