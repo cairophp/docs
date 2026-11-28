@@ -25,6 +25,18 @@ name, so Cairo presents itself under another name only while opcache starts;
 `PHP_SAPI` is still `cairo`. Its usual ini settings apply, and `CAIRO_OPCACHE=0`
 leaves it out.
 
+The server also turns on opcache's JIT where PHP has it built in, with
+`opcache.jit = tracing` and `opcache.jit_buffer_size = 64M`. PHP 8.4 and
+later leave the JIT off by default, but a server that runs the same code for
+hours gains from it: Laravel through Octane in isolated mode served 12% more
+requests, and a real API request 5 to 12% more, for 11 to 24 MB more memory.
+These are defaults: a `php.ini` that sets either line keeps its value, so
+`opcache.jit = disable` turns it off. The static binary before PHP 8.5 has no
+JIT (see below), and `cairo php` leaves opcache to `opcache.enable_cli` as
+PHP does. An extension that replaces `zend_execute_ex()`, such as some
+profilers, makes opcache turn the JIT off and log a warning; set
+`opcache.jit = disable` to keep that quiet.
+
 PHP settings come from a php.ini: `cairo serve --php-ini FILE` (or
 `CAIRO_PHP_INI`, or `PHPRC`), otherwise PHP's own search, never the current
 directory. Without one, errors are logged and not displayed. PHP's log lines
