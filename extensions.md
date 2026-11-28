@@ -31,7 +31,7 @@ are thread-safe). Its PHP, its php.ini directory and its tools are the `php`
 image's, so an extension goes in the way the `php` image documents:
 
 ```dockerfile
-FROM ghcr.io/cairophp/cairo:0.7-php8.5-trixie
+FROM ghcr.io/cairophp/cairo:0.8-php8.5-trixie
 USER root
 RUN docker-php-ext-install pdo_mysql intl \
     && pecl install redis \
@@ -46,10 +46,10 @@ threads load the same.
 
 | Tag | What it follows |
 |---|---|
-| `0.7.0-php8.4-trixie` | That release with PHP 8.4, never moved |
-| `0.7-php8.4-trixie` | The newest `0.7.x` with PHP 8.4 |
+| `0.8.0-php8.4-trixie` | That release with PHP 8.4, never moved |
+| `0.8-php8.4-trixie` | The newest `0.8.x` with PHP 8.4 |
 | `php8.4-trixie` | The newest release with PHP 8.4 |
-| `0.7-trixie`, `trixie` | The same, with the newest PHP |
+| `0.8-trixie`, `trixie` | The same, with the newest PHP |
 
 The same goes for `php8.3`, `php8.5` and `php8.6`. The image starts as the
 Alpine one does ([Docker](docker.md#an-image-for-your-app)): it runs
